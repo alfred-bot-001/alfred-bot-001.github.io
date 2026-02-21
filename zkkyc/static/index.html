@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zkKYC — 零知识 KYC 凭证系统</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div>
+    <h1>🔐 zkKYC 演示</h1>
+    <div class="subtitle">零知识 KYC 凭证系统 — 链上 P2P 交易隐私合规方案</div>
+  </div>
+  <div class="status-bar">
+    <a href="/user-demo.html" style="font-size:12px; color:var(--accent); text-decoration:none; padding:6px 14px; border:1px solid var(--accent); border-radius:20px;">👤 切换到用户视角</a>
+    <div class="stat"><span class="dot off" id="dot-issuer"></span> 发行方</div>
+    <div class="stat"><span class="dot off" id="dot-user"></span> 用户</div>
+    <div class="stat"><span class="dot off" id="dot-proof"></span> 证明</div>
+    <div class="stat" id="stat-creds">凭证数: 0</div>
+    <div class="stat" id="stat-verifs">验证数: 0</div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Step Navigation -->
+  <div class="steps-nav">
+    <button class="step-btn active" onclick="showStep(1)">① 发行方初始化</button>
+    <button class="step-btn" onclick="showStep(2)">② KYC & 凭证签发</button>
+    <button class="step-btn" onclick="showStep(3)">③ P2P 交易请求</button>
+    <button class="step-btn" onclick="showStep(4)">④ 生成 ZK 证明</button>
+    <button class="step-btn" onclick="showStep(5)">⑤ 验证证明</button>
+    <button class="step-btn" onclick="showStep(6)">⑥ 凭证撤销</button>
+    <button class="step-btn" onclick="showStep(7)">⑦ 不可关联性</button>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- STEP 1 -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="step-content active" id="step-1">
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🏛️ 初始化发行方</h2>
+          <span class="badge">第 1 步 / 共 7 步</span>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--text2); margin-bottom:20px;">
+            发行方（如 Binance）建立去中心化身份和密码学密钥。这是一次性的信任锚点设置。
+          </p>
+          <button class="btn btn-primary" id="btn-setup" onclick="setupIssuer()">
+            <span class="spinner"></span>
+            🚀 初始化 Binance 为发行方
+          </button>
+          <div id="issuer-result" class="json-view" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="panel explanation">
+        <div class="panel-header"><h2>📖 技术解析</h2></div>
+        <div class="panel-body" id="exp-1">
+          <div class="exp-title">第一步：发行方初始化</div>
+          <p style="color:var(--text2); margin-bottom:16px;">
+            在签发任何 KYC 凭证之前，发行方需要通过 DID（去中心化标识符）在区块链上建立身份。
+          </p>
+          <div class="exp-technical">点击"初始化"后会发生什么：
+
+1. 生成 ECDSA P-256 椭圆曲线密钥对（私钥 + 公钥）
+2. 从公钥哈希推导出 DID 标识符
+3. 创建 W3C DID 文档（去中心化身份文档）
+4. 将公钥注册到链上注册表
+
+公钥被公开发布，任何人都可以用它来验证
+该发行方签发的凭证。</div>
+          <div class="exp-next">👉 点击按钮开始演示</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- STEP 2 -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="step-content" id="step-2">
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>📋 提交 KYC 并获取凭证</h2>
+          <span class="badge">第 2 步 / 共 7 步</span>
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>姓名</label>
+            <input type="text" id="kyc-name" value="张小明" />
+          </div>
+          <div class="form-group">
+            <label>国家代码</label>
+            <input type="text" id="kyc-country" value="SG" maxlength="2" />
+          </div>
+          <div class="form-group">
+            <label>证件号码</label>
+            <input type="text" id="kyc-id" value="S1234567A" />
+          </div>
+          <div class="form-group">
+            <label>KYC 等级</label>
+            <select id="kyc-level">
+              <option value="1">等级 1 — 基础认证</option>
+              <option value="2" selected>等级 2 — 增强认证</option>
+              <option value="3">等级 3 — 机构级认证</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btn-kyc" onclick="submitKYC()">
+            <span class="spinner"></span>
+            📜 完成 KYC 并签发凭证
+          </button>
+          <div id="kyc-result" class="json-view" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="panel explanation">
+        <div class="panel-header"><h2>📖 技术解析</h2></div>
+        <div class="panel-body" id="exp-2">
+          <div class="exp-title">第二步：KYC 与凭证签发</div>
+          <p style="color:var(--text2); margin-bottom:16px;">
+            用户向发行方提交 KYC 信息。验证通过后，发行方创建一份用 BBS+ 签名的 W3C 可验证凭证。
+          </p>
+          <div class="exp-technical">KYC 过程中发生了什么：
+
+1. 用户提交个人信息（姓名、国籍、证件号）
+2. 发行方验证身份（本演示中为模拟）
+3. 为用户生成独立的 DID（与链上地址无关）
+4. 创建包含 KYC 认证的可验证凭证（VC）
+5. 用 BBS+ 签名对所有字段签名
+6. 将凭证加入 Merkle 树（有效集合）
+7. 用户将凭证存储在本地设备
+
+⚠️ 完成后，用户的个人信息仅存储在自己的
+设备上，不会上链，也不会留在发行方。</div>
+          <div class="exp-next">👉 填写表单并签发凭证</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- STEP 3 -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="step-content" id="step-3">
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🤝 P2P 交易请求</h2>
+          <span class="badge">第 3 步 / 共 7 步</span>
+        </div>
+        <div class="panel-body">
+          <div class="wallet-row">
+            <div class="wallet-card">
+              <h3>👩 Alice（持有方）</h3>
+              <div class="addr" id="alice-did">DID: 尚未创建</div>
+              <div style="margin-top:10px; color:var(--green); font-size:13px;">✅ 已持有 KYC 凭证</div>
+            </div>
+            <div class="arrow-col">⇄</div>
+            <div class="wallet-card">
+              <h3>👨 Bob（验证方）</h3>
+              <div class="addr">0xBob...7f3e</div>
+              <div style="margin-top:10px; color:var(--orange); font-size:13px;">⚠️ 需要对方的 KYC 证明</div>
+            </div>
+          </div>
+          <div style="margin-top:20px; padding:16px; background:var(--bg); border-radius:8px;">
+            <p style="font-size:14px; color:var(--text2); margin-bottom:12px;">
+              <strong style="color:var(--text)">Bob</strong> 想向 Alice 转账 10 ETH，
+              但需要先确认她通过了知名机构的 KYC 认证。
+              Bob 生成一个随机挑战 nonce：
+            </p>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="text" id="verifier-nonce" readonly style="font-family:monospace; font-size:12px; flex:1;" />
+              <button class="btn btn-secondary" onclick="generateNonce()">🎲 新随机数</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:16px;" onclick="generateNonce(); showStep(4);">
+            ➡️ 进入证明生成
+          </button>
+        </div>
+      </div>
+      <div class="panel explanation">
+        <div class="panel-header"><h2>📖 技术解析</h2></div>
+        <div class="panel-body" id="exp-3">
+          <div class="exp-title">第三步：P2P 交易场景</div>
+          <p style="color:var(--text2); margin-bottom:16px;">
+            双方要在链上做 P2P 转账。双方都没有链上 KYC，但 Bob 需要确认 Alice 的合规状态。
+          </p>
+          <div class="exp-technical">挑战-响应协议：
+
+1. Bob 想和 Alice 进行交易
+2. Bob 要求："请证明你通过了 KYC"
+3. Bob 生成一个随机数 NONCE（挑战值）
+4. Bob 将 nonce 发送给 Alice
+
+为什么要用新的随机数？
+→ 防止重放攻击（重复使用旧证明）
+→ 保证不可关联性（每次证明都是唯一的）
+→ 证明这个证明是"现在"生成的，不是昨天的
+
+这类似于 HTTPS 握手的工作原理 ——
+一个新的随机值确保响应是实时生成的。</div>
+          <div class="exp-next">👉 生成随机数，然后进入证明生成步骤</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- STEP 4 -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="step-content" id="step-4">
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🔐 生成零知识证明</h2>
+          <span class="badge">第 4 步 / 共 7 步</span>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--text2); margin-bottom:16px;">
+            Alice 将在不暴露身份的前提下，证明自己通过了 KYC。选择要披露的字段：
+          </p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;">
+            <label style="display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg); border-radius:8px; cursor:pointer; font-size:13px;">
+              <input type="checkbox" checked disabled /> KYC等级 <span style="color:var(--green)">（披露）</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg); border-radius:8px; cursor:pointer; font-size:13px;">
+              <input type="checkbox" checked disabled /> 制裁清单 <span style="color:var(--green)">（披露）</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg); border-radius:8px; cursor:pointer; font-size:13px;">
+              <input type="checkbox" checked disabled /> 反洗钱检查 <span style="color:var(--green)">（披露）</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg); border-radius:8px; cursor:pointer; font-size:13px;">
+              <input type="checkbox" checked disabled /> 国家风险 <span style="color:var(--green)">（披露）</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg); border-radius:8px; font-size:13px; opacity:0.5;">
+              <input type="checkbox" disabled /> 姓名 <span style="color:var(--red)">（隐藏）</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg); border-radius:8px; font-size:13px; opacity:0.5;">
+              <input type="checkbox" disabled /> 国籍 <span style="color:var(--red)">（隐藏）</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg); border-radius:8px; font-size:13px; opacity:0.5;">
+              <input type="checkbox" disabled /> 证件号码 <span style="color:var(--red)">（隐藏）</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; padding:10px; background:var(--bg); border-radius:8px; font-size:13px; opacity:0.5;">
+              <input type="checkbox" disabled /> DID 标识 <span style="color:var(--red)">（隐藏）</span>
+            </label>
+          </div>
+          <button class="btn btn-primary" id="btn-proof" onclick="generateProof()">
+            <span class="spinner"></span>
+            🔐 生成零知识证明
+          </button>
+          <div id="proof-result" class="json-view" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="panel explanation">
+        <div class="panel-header"><h2>📖 技术解析</h2></div>
+        <div class="panel-body" id="exp-4">
+          <div class="exp-title">第四步：零知识证明生成</div>
+          <div class="exp-technical">Alice 的设备在本地执行以下操作：
+
+1. 选择性披露（BBS+ 签名）
+   → 披露：KYC等级、制裁状态、反洗钱、国家风险
+   → 隐藏：姓名、国籍、证件号、DID
+   → 证明：隐藏字段确实被发行方签名过
+
+2. Merkle 成员证明（非撤销证明）
+   → 证明凭证在有效集合中
+   → 不暴露是哪个凭证
+
+3. Nullifier（消零器）生成
+   → Nullifier = Hash(凭证密钥 || Bob的nonce)
+   → 每次交互唯一，防止重放
+   → 无法与其他证明关联
+
+4. 过期检查
+   → 证明凭证未过期
+   → 不暴露具体过期日期
+
+生成的证明约 2KB，不含任何个人信息，
+任何人都可用发行方公钥验证。</div>
+          <div class="privacy-box">
+            🔒 <strong>隐私保证：</strong>该证明在数学上保证验证方除了被披露的字段外，
+            不会获取任何其他信息。即使是发行方也无法将此证明与原始凭证签发关联起来。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- STEP 5 -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="step-content" id="step-5">
+    <!-- 验证流程图 -->
+    <div class="panel" style="margin-bottom:24px;">
+      <div class="panel-header">
+        <h2>🔍 Bob 的完整验证流程</h2>
+        <span class="badge">第 5 步 / 共 7 步</span>
+      </div>
+      <div class="panel-body">
+        <!-- 流程时间线 -->
+        <div class="verify-timeline">
+
+          <!-- Step A: 获取信任锚点 -->
+          <div class="vt-step" id="vt-step-0">
+            <div class="vt-icon">⛓️</div>
+            <div class="vt-content">
+              <div class="vt-title">第零步：从链上获取信任锚点</div>
+              <div class="vt-desc">Bob 自己从链上合约读取数据，不依赖 Alice，Alice 无法伪造</div>
+              <div class="vt-detail">
+                <div class="vt-code">
+                  <div><span class="json-key">issuer_pubkey</span> = Registry.getIssuer().publicKey &nbsp; <span style="color:var(--text2)">← 链上读取</span></div>
+                  <div><span class="json-key">merkle_root</span> &nbsp; = Registry.getIssuer().merkleRoot <span style="color:var(--text2)">← 链上读取</span></div>
+                </div>
+                <div class="vt-note">
+                  💡 <strong>关键：</strong>Merkle 根和公钥都来自链上合约，是公开数据。
+                  Bob 自己读链，不需要问 Alice 或 Binance。这就是 trustless 的含义。
+                </div>
+              </div>
+              <div class="vt-status" id="vt-status-0">⏳ 等待执行</div>
+            </div>
+          </div>
+
+          <!-- Step 1: BBS+ 签名 -->
+          <div class="vt-step" id="vt-step-1">
+            <div class="vt-icon">🔏</div>
+            <div class="vt-content">
+              <div class="vt-title">第一步：验证 BBS+ 签名</div>
+              <div class="vt-desc">发行方真的签了这些字段吗？</div>
+              <div class="vt-detail">
+                <div class="vt-code">
+                  <div><span style="color:var(--text2)">// 对每个披露字段：验证承诺能正确打开</span></div>
+                  <div>for field in [kycLevel, sanctionClear, amlCheck, countryRisk]:</div>
+                  <div>&nbsp;&nbsp;assert Hash(value || blinding) == commitment &nbsp; <span style="color:var(--green)">✓</span></div>
+                  <div></div>
+                  <div><span style="color:var(--text2)">// 验证组合签名（含隐藏字段的承诺）</span></div>
+                  <div>combined = sort_concat(<span style="color:var(--green)">所有字段的 commitments</span>)</div>
+                  <div>ECDSA.verify(<span class="json-key">issuer_pubkey</span>, combined, signature) <span style="color:var(--green)">✓</span></div>
+                </div>
+                <div class="vt-note">
+                  📌 隐藏字段（姓名、证件号等）的 <strong>承诺值</strong> 也在签名里，
+                  所以 Bob 能确认"有些字段被签了，但我看不到内容"。
+                  这就是 BBS+ 选择性披露的核心。
+                </div>
+              </div>
+              <div class="vt-status" id="vt-status-1">⏳ 等待执行</div>
+            </div>
+          </div>
+
+          <!-- Step 2: Merkle 验证 -->
+          <div class="vt-step" id="vt-step-2">
+            <div class="vt-icon">🌳</div>
+            <div class="vt-content">
+              <div class="vt-title">第二步：验证 Merkle 证明（凭证没被撤销？）</div>
+              <div class="vt-desc">凭证是否仍在有效集合中</div>
+              <div class="vt-detail">
+                <div class="vt-code">
+                  <div><span style="color:var(--text2)">// Alice 提供的 Merkle 路径</span></div>
+                  <div>leaf_hash = Hash(credential_id)</div>
+                  <div>siblings = [h₁, h₂, h₃, ...]</div>
+                  <div></div>
+                  <div><span style="color:var(--text2)">// Bob 自底向上重算根</span></div>
+                  <div>current = leaf_hash</div>
+                  <div>for sibling in siblings:</div>
+                  <div>&nbsp;&nbsp;current = Hash(current + sibling)</div>
+                  <div>computed_root = current</div>
+                  <div></div>
+                  <div><span style="color:var(--text2)">// 与链上 root 比较</span></div>
+                  <div>assert computed_root == <span class="json-key">merkle_root</span> <span style="color:var(--green)">✓</span></div>
+                </div>
+                <div class="vt-note">
+                  🌿 Bob 不知道 credential_id 是什么，只知道"链上有效集合中存在某个凭证，
+                  它的 Merkle 路径能算出正确的根"。如果凭证被撤销，根会变，路径算不出来。
+                </div>
+              </div>
+              <div class="vt-status" id="vt-status-2">⏳ 等待执行</div>
+            </div>
+          </div>
+
+          <!-- Step 3: Nullifier -->
+          <div class="vt-step" id="vt-step-3">
+            <div class="vt-icon">🛡️</div>
+            <div class="vt-content">
+              <div class="vt-title">第三步：检查 Nullifier（防重放）</div>
+              <div class="vt-desc">这个证明之前用过吗？</div>
+              <div class="vt-detail">
+                <div class="vt-code">
+                  <div>nullifier = proof.nullifier</div>
+                  <div></div>
+                  <div><span style="color:var(--text2)">// 检查本地/链上记录</span></div>
+                  <div>assert nullifier NOT IN used_nullifiers <span style="color:var(--green)">✓ 新鲜</span></div>
+                  <div></div>
+                  <div><span style="color:var(--text2)">// 记录，防止下次重放</span></div>
+                  <div>used_nullifiers.add(nullifier)</div>
+                </div>
+                <div class="vt-note">
+                  🔄 Nullifier = Hash(凭证密钥 || Bob的nonce)。因为 nonce 是 Bob 随机生成的，
+                  Alice 无法预先准备。同一凭证 + 不同 nonce = 不同 nullifier = 不可关联。
+                </div>
+              </div>
+              <div class="vt-status" id="vt-status-3">⏳ 等待执行</div>
+            </div>
+          </div>
+
+          <!-- Step 4: 业务字段 -->
+          <div class="vt-step" id="vt-step-4">
+            <div class="vt-icon">📋</div>
+            <div class="vt-content">
+              <div class="vt-title">第四步：检查业务合规字段</div>
+              <div class="vt-desc">从已验证的披露字段中读取合规状态</div>
+              <div class="vt-detail">
+                <div class="vt-code">
+                  <div>sanctionClear == <span class="json-bool">true</span> &nbsp;&nbsp; <span style="color:var(--text2)">→ 不在制裁名单</span> <span style="color:var(--green)">✓</span></div>
+                  <div>amlCheck == <span class="json-string">"passed"</span> &nbsp;&nbsp;&nbsp; <span style="color:var(--text2)">→ 反洗钱通过</span> <span style="color:var(--green)">✓</span></div>
+                  <div>kycLevel >= <span class="json-number">1</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:var(--text2)">→ KYC 等级足够</span> <span style="color:var(--green)">✓</span></div>
+                  <div>countryRisk != <span class="json-string">"high"</span> &nbsp; <span style="color:var(--text2)">→ 国家风险可接受</span> <span style="color:var(--green)">✓</span></div>
+                </div>
+                <div class="vt-note">
+                  ✅ 这些值已通过第一步的签名验证确认是真实的（发行方签过的），Alice 无法伪造。
+                  Bob 看到的只是合规结果，看不到任何个人信息。
+                </div>
+              </div>
+              <div class="vt-status" id="vt-status-4">⏳ 等待执行</div>
+            </div>
+          </div>
+
+          <!-- Step 5: 过期 -->
+          <div class="vt-step" id="vt-step-5">
+            <div class="vt-icon">⏰</div>
+            <div class="vt-content">
+              <div class="vt-title">第五步：过期检查</div>
+              <div class="vt-desc">凭证是否仍在有效期内</div>
+              <div class="vt-detail">
+                <div class="vt-code">
+                  <div>proof.expirationProof.notExpired == <span class="json-bool">true</span> <span style="color:var(--green)">✓</span></div>
+                </div>
+              </div>
+              <div class="vt-status" id="vt-status-5">⏳ 等待执行</div>
+            </div>
+          </div>
+
+          <!-- Final -->
+          <div class="vt-step" id="vt-step-final" style="display:none;">
+            <div class="vt-icon" id="vt-final-icon">🎯</div>
+            <div class="vt-content">
+              <div class="vt-title" id="vt-final-title">最终判定</div>
+              <div class="vt-desc" id="vt-final-desc"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 验证按钮 -->
+        <div style="text-align:center; margin-top:24px;">
+          <button class="btn btn-primary" id="btn-verify" onclick="verifyProofAnimated()" style="font-size:16px; padding:14px 32px;">
+            <span class="spinner"></span>
+            🔍 开始逐步验证（以 Bob 身份）
+          </button>
+        </div>
+
+        <!-- Bob 最终知道什么 -->
+        <div id="bob-knowledge" style="display:none; margin-top:24px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div style="padding:16px; background:rgba(63,185,80,0.08); border:1px solid rgba(63,185,80,0.2); border-radius:8px;">
+              <div style="font-weight:700; color:var(--green); margin-bottom:10px;">✅ Bob 知道的</div>
+              <div style="font-size:13px; color:var(--text2); line-height:1.8;">
+                • Alice 通过了某大机构的 KYC<br>
+                • Alice 不在制裁名单<br>
+                • Alice 反洗钱检查已通过<br>
+                • Alice 所在国家风险低<br>
+                • 凭证未过期、未被撤销
+              </div>
+            </div>
+            <div style="padding:16px; background:rgba(248,81,73,0.08); border:1px solid rgba(248,81,73,0.2); border-radius:8px;">
+              <div style="font-weight:700; color:var(--red); margin-bottom:10px;">❌ Bob 不知道的</div>
+              <div style="font-size:13px; color:var(--text2); line-height:1.8;">
+                • Alice 叫什么名字<br>
+                • Alice 是哪国人<br>
+                • Alice 的证件号码<br>
+                • 是 Binance 还是 Coinbase 签发的<br>
+                • Alice 的其他链上交易记录
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧说明 -->
+    <div class="panel explanation">
+      <div class="panel-header"><h2>📖 技术解析</h2></div>
+      <div class="panel-body" id="exp-5">
+        <div class="exp-title">第五步：Bob 的验证流程</div>
+        <div class="exp-technical">核心设计：Bob 的信任不来自 Alice，而来自链上数据
+
+┌──────────────────────────────────┐
+│  链上 Registry 合约（公开数据） │
+│  ┌────────────────────────────┐ │
+│  │ issuer_pubkey: 0x4a7c...  │ │
+│  │ merkle_root:   0xf3b1...  │ │
+│  │ last_updated:  1740100000 │ │
+│  └────────────────────────────┘ │
+└──────────────────────────────────┘
+         ▲ Bob 自己读链
+         │
+    ┌────┴────┐
+    │  Bob    │ ← 只信任链上数据
+    └────┬────┘
+         │ 用链上数据验证 Alice 的 proof
+         ▼
+    ┌─────────┐
+    │  Alice  │ ← 只提供 proof，无法伪造
+    └─────────┘
+
+❓ 常见问题：
+
+Q: Alice 每次生成新证明，Merkle 根会变吗？
+A: 不会！Merkle 根只在凭证签发/撤销时变。
+   生成证明是 Alice 本地操作，不影响 Merkle 树。
+
+Q: Merkle 根从哪来？
+A: 链上合约公开存储，任何人可读。
+   Binance 每次签发/撤销时更新合约。
+
+Q: Bob 需要联系 Binance 吗？
+A: 不需要。Bob 只需要读链上合约。
+   这就是"去中心化验证"的含义。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- STEP 6 -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="step-content" id="step-6">
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🚫 凭证撤销</h2>
+          <span class="badge">第 6 步 / 共 7 步</span>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--text2); margin-bottom:16px;">
+            模拟 Alice 被加入制裁名单的场景。发行方撤销她的凭证，但不会公开暴露她的身份。
+          </p>
+          <button class="btn btn-danger" id="btn-revoke" onclick="revokeCredential()">
+            <span class="spinner"></span>
+            🚫 撤销 Alice 的凭证
+          </button>
+          <div id="revoke-result" style="margin-top:16px;"></div>
+          <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:16px;">
+            <p style="color:var(--text2); margin-bottom:12px; font-size:14px;">
+              现在尝试用被撤销的凭证生成并验证新的证明：
+            </p>
+            <button class="btn btn-secondary" id="btn-revoke-test" onclick="testRevokedProof()">
+              <span class="spinner"></span>
+              🔄 测试已撤销凭证
+            </button>
+            <div id="revoke-test-result" style="margin-top:12px;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel explanation">
+        <div class="panel-header"><h2>📖 技术解析</h2></div>
+        <div class="panel-body" id="exp-6">
+          <div class="exp-title">第六步：撤销演示</div>
+          <div class="exp-technical">撤销机制的工作原理：
+
+1. 发行方撤销凭证
+   → 从 Merkle 树中移除该凭证
+   → Merkle 根发生变化
+
+2. 链上更新
+   → 新的 Merkle 根被发布
+   → 旧的证明自动失效
+
+3. 隐私得到保护
+   → Merkle 树不会暴露哪个叶子被移除了
+   → 其他用户的凭证仍然有效
+   → 只有被撤销用户的证明会失败
+
+4. 接下来会发生什么
+   → Alice 仍然可以生成证明（她还有凭证）
+   → 但验证会失败，因为：
+     - 她的凭证不再在 Merkle 树中
+     - Merkle 成员证明与新根不匹配
+
+这是相比黑名单的关键优势：
+可以撤销某人的凭证而不公开其身份。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- STEP 7 -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="step-content" id="step-7">
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🔗 不可关联性演示</h2>
+          <span class="badge">第 7 步 / 共 7 步</span>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--text2); margin-bottom:16px;">
+            首先创建第二个用户来演示不可关联性（因为 Alice 已被撤销）。
+          </p>
+          <button class="btn btn-secondary" id="btn-user2" onclick="createUser2()" style="margin-bottom:16px;">
+            👤 创建用户 Charlie
+          </button>
+          <p style="color:var(--text2); margin-bottom:16px;">
+            用同一凭证生成 3 次证明，每次使用不同的 nonce。
+            观察：它们看起来完全不同，无法被关联！
+          </p>
+          <button class="btn btn-primary" id="btn-unlink" onclick="demoUnlinkability()">
+            <span class="spinner"></span>
+            🔗 生成 3 个不可关联的证明
+          </button>
+          <div id="unlink-result" style="margin-top:16px;"></div>
+        </div>
+      </div>
+      <div class="panel explanation">
+        <div class="panel-header"><h2>📖 技术解析</h2></div>
+        <div class="panel-body" id="exp-7">
+          <div class="exp-title">第七步：不可关联性</div>
+          <div class="exp-technical">为什么证明无法被关联：
+
+NULLIFIER 设计：
+  Nullifier = Hash(凭证密钥 || 验证方随机数)
+
+由于每个验证方提供不同的随机 nonce：
+→ Nullifier 每次都不同
+→ 证明结构也会变化（盲因子重新随机化）
+→ 观察者无法关联多次证明
+
+对比：
+
+传统 KYC：
+  向 3 个商家出示护照 →
+  3 个商家都知道你是同一个人 ❌
+
+zkKYC：
+  向 3 个商家出示 ZK 证明 →
+  每个商家看到的是独立的证明 ✅
+  无法判断是否为同一人
+
+这对 P2P 交易至关重要：
+→ 商家 A 无法与商家 B 串通追踪你
+→ 即使发行方也无法追溯哪个证明是你的
+→ 你的交易隐私得到完全保护</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reset button -->
+<button class="btn btn-secondary reset-btn" onclick="resetAll()">🔄 重置演示</button>
+
+<script src="app.js"></script>
+</body>
+</html>

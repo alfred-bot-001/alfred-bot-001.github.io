@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zkKYC — 用户视角演示</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --card: #14141f;
+      --card2: #1c1c2e;
+      --border: #2a2a3d;
+      --text: #e8e8f0;
+      --text2: #8888a0;
+      --blue: #4f8fff;
+      --green: #34d399;
+      --red: #f43f5e;
+      --orange: #f59e0b;
+      --purple: #a78bfa;
+      --cyan: #22d3ee;
+      --radius: 16px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .topbar h1 { font-size: 18px; }
+
+    /* ── Mode tabs ── */
+    .mode-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 20px 20px 0;
+      flex-wrap: wrap;
+    }
+    .mode-tab {
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text2);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .mode-tab:hover { border-color: var(--blue); color: var(--text); }
+    .mode-tab.active {
+      background: rgba(79,143,255,0.15);
+      border-color: var(--blue);
+      color: var(--blue);
+      font-weight: 700;
+    }
+    .mode-desc {
+      text-align: center;
+      padding: 12px 20px 0;
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .mode-content { display: none; }
+    .mode-content.active { display: block; }
+
+    /* ── Phone frames ── */
+    .phones-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding: 30px 20px 120px;
+      flex-wrap: wrap;
+    }
+    .phone {
+      width: 375px;
+      min-height: 580px;
+      background: var(--card);
+      border-radius: 32px;
+      border: 2px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .phone-header {
+      padding: 14px 18px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .phone-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .phone-avatar.alice { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+    .phone-avatar.bob { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
+    .phone-avatar.platform { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .phone-name { font-weight: 700; font-size: 15px; }
+    .phone-sub { font-size: 11px; color: var(--text2); }
+    .phone-body { padding: 16px; max-height: 520px; overflow-y: auto; }
+
+    /* ── Wallet card ── */
+    .wallet-card {
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      border-radius: 14px; padding: 16px; margin-bottom: 14px;
+      border: 1px solid rgba(99,102,241,0.3);
+    }
+    .wallet-card .label { font-size: 11px; color: rgba(255,255,255,0.5); }
+    .wallet-card .balance { font-size: 24px; font-weight: 700; margin: 2px 0; }
+    .wallet-card .addr { font-size: 10px; color: rgba(255,255,255,0.35); font-family: monospace; }
+
+    /* ── Chat bubbles ── */
+    .chat-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .bubble {
+      max-width: 90%; padding: 10px 14px; border-radius: 14px;
+      font-size: 13px; line-height: 1.6; animation: bubbleIn 0.3s ease;
+    }
+    @keyframes bubbleIn {
+      from { opacity:0; transform: translateY(8px) scale(0.95); }
+      to { opacity:1; transform: translateY(0) scale(1); }
+    }
+    .bubble.system {
+      align-self: center; background: var(--card2); border: 1px solid var(--border);
+      color: var(--text2); font-size: 11px; text-align: center; max-width: 95%;
+    }
+    .bubble.self { align-self: flex-end; background: var(--blue); color: #fff; border-bottom-right-radius: 4px; }
+    .bubble.other { align-self: flex-start; background: var(--card2); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+    .bubble.success {
+      align-self: center; background: rgba(52,211,153,0.1);
+      border: 1px solid rgba(52,211,153,0.3); color: var(--green); text-align: center;
+    }
+    .bubble.danger {
+      align-self: center; background: rgba(244,63,94,0.1);
+      border: 1px solid rgba(244,63,94,0.3); color: var(--red); text-align: center;
+    }
+
+    /* ── Cards ── */
+    .cred-card {
+      background: linear-gradient(135deg, #064e3b, #065f46);
+      border-radius: 14px; padding: 14px 16px; margin: 10px 0;
+      border: 1px solid rgba(52,211,153,0.3);
+    }
+    .cred-card .cred-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .cred-card .cred-title { font-weight: 700; font-size: 14px; }
+    .cred-card .cred-badge { font-size: 10px; padding: 3px 8px; border-radius: 8px; background: rgba(52,211,153,0.2); color: var(--green); }
+    .cred-card .cred-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .cred-card .cred-row:last-child { border: none; }
+    .cred-card .cred-label { color: rgba(255,255,255,0.5); }
+    .cred-card .cred-val { font-weight: 600; }
+    .cred-card .cred-hidden { color: var(--red); font-size: 10px; }
+
+    .proof-card {
+      background: linear-gradient(135deg, #1e1b4b, #3730a3);
+      border-radius: 14px; padding: 14px 16px; margin: 10px 0;
+      border: 1px solid rgba(167,139,250,0.3);
+    }
+    .proof-card .proof-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; color: var(--purple); }
+    .proof-card .proof-item { display: flex; align-items: center; gap: 6px; padding: 4px 0; font-size: 12px; }
+    .proof-card .dot { width: 5px; height: 5px; border-radius: 50%; }
+    .proof-card .dot.green { background: var(--green); }
+    .proof-card .dot.red { background: var(--red); }
+
+    .verify-card {
+      background: var(--card2); border-radius: 10px; padding: 10px 14px;
+      margin: 8px 0; border: 1px solid var(--border);
+    }
+    .verify-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 0; font-size: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .verify-item:last-child { border: none; }
+    .vi-icon {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; flex-shrink: 0;
+    }
+
+    /* ── Platform UI ── */
+    .platform-frame {
+      width: 750px; max-width: 95vw;
+      background: var(--card);
+      border-radius: 16px;
+      border: 2px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .platform-topbar {
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #1a1a2e, #0f172a);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .platform-topbar .url-bar {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 14px; font-size: 12px; color: var(--text2); font-family: monospace;
+      flex: 1; margin: 0 16px;
+    }
+    .platform-body { padding: 24px; min-height: 500px; }
+
+    .trade-card {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    }
+    .trade-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 14px;
+    }
+    .trade-row:last-child { border: none; }
+    .trade-label { color: var(--text2); }
+    .kyc-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+    }
+    .kyc-badge.pending { background: rgba(245,158,11,0.15); color: var(--orange); border: 1px solid rgba(245,158,11,0.3); }
+    .kyc-badge.checking { background: rgba(79,143,255,0.15); color: var(--blue); border: 1px solid rgba(79,143,255,0.3); }
+    .kyc-badge.verified { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+
+    /* ── Terminal ── */
+    .terminal {
+      background: #0c0c14;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    .terminal-bar {
+      padding: 8px 14px;
+      background: #1a1a2a;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .terminal-body {
+      padding: 14px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      line-height: 1.8;
+      color: var(--green);
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .terminal-body .cmd { color: var(--cyan); }
+    .terminal-body .comment { color: #555; }
+    .terminal-body .output { color: var(--text2); }
+    .terminal-body .success { color: var(--green); }
+    .terminal-body .error { color: var(--red); }
+
+    /* ── Buttons ── */
+    .action-btn {
+      width: 100%; padding: 12px; border-radius: 12px; border: none;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 10px;
+    }
+    .action-btn:hover { transform: translateY(-1px); }
+    .action-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .action-btn.primary { background: var(--blue); color: #fff; }
+    .action-btn.green { background: var(--green); color: #000; }
+    .action-btn.danger { background: var(--red); color: #fff; }
+    .action-btn.outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+    /* ── Bottom bar ── */
+    .narrative {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(0deg, var(--bg) 70%, transparent);
+      padding: 30px 20px 16px; text-align: center; z-index: 50;
+    }
+    .step-indicator { display: inline-flex; gap: 6px; margin-bottom: 8px; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all 0.3s; }
+    .step-dot.active { background: var(--blue); width: 24px; border-radius: 4px; }
+    .step-dot.done { background: var(--green); }
+    .narrative .step-text { font-size: 13px; color: var(--text2); max-width: 700px; margin: 0 auto; }
+
+    .summary-box {
+      background: var(--card2); border-radius: 10px; padding: 12px; margin-top: 8px;
+      border: 1px solid var(--border); font-size: 11px; line-height: 1.8; color: var(--text2);
+    }
+    .summary-box .stitle { font-weight: 700; font-size: 12px; margin-bottom: 6px; }
+
+    @media (max-width: 850px) {
+      .phones-container { flex-direction: column; align-items: center; gap: 20px; padding: 20px 10px 120px; }
+      .phone { width: 100%; max-width: 400px; }
+      .platform-frame { width: 100%; }
+    }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🔐 zkKYC 用户视角</h1>
+  <a href="/" style="font-size:12px; color:var(--text2); text-decoration:none; padding:5px 12px; border:1px solid var(--border); border-radius:8px;">📖 技术视角 →</a>
+</div>
+
+<!-- Mode tabs -->
+<div class="mode-tabs">
+  <div class="mode-tab active" onclick="switchMode('wallet')">📱 方案A：钱包对钱包</div>
+  <div class="mode-tab" onclick="switchMode('platform')">🌐 方案B：P2P 平台</div>
+  <div class="mode-tab" onclick="switchMode('manual')">💻 方案C：手动验证</div>
+</div>
+<div class="mode-desc" id="mode-desc">Alice 和 Bob 通过钱包直接 P2P 交易，SDK 自动完成验证</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- MODE A: Wallet to Wallet -->
+<!-- ═══════════════════════════════════════ -->
+<div class="mode-content active" id="mode-wallet">
+  <div class="phones-container">
+    <div class="phone">
+      <div class="phone-header">
+        <div class="phone-avatar alice">👩</div>
+        <div><div class="phone-name">Alice 的钱包</div><div class="phone-sub" id="a-status-w">等待开始...</div></div>
+      </div>
+      <div class="phone-body" id="a-body-w">
+        <div class="wallet-card">
+          <div class="label">总资产</div><div class="balance">32.5 ETH</div>
+          <div class="addr">0xAlice...8a2f</div>
+        </div>
+        <div class="chat-area" id="a-chat-w"></div>
+        <button class="action-btn primary" id="a-btn-w" onclick="walletNext()">🚀 开始演示</button>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="phone-header">
+        <div class="phone-avatar bob">👨</div>
+        <div><div class="phone-name">Bob 的钱包</div><div class="phone-sub" id="b-status-w">等待开始...</div></div>
+      </div>
+      <div class="phone-body" id="b-body-w">
+        <div class="wallet-card">
+          <div class="label">总资产</div><div class="balance">85.2 ETH</div>
+          <div class="addr">0xBob...7f3e</div>
+        </div>
+        <div class="chat-area" id="b-chat-w"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- MODE B: Platform -->
+<!-- ═══════════════════════════════════════ -->
+<div class="mode-content" id="mode-platform">
+  <div class="phones-container" style="justify-content:center;">
+    <div class="platform-frame">
+      <div class="platform-topbar">
+        <div style="display:flex; gap:6px;">
+          <div class="terminal-dot" style="background:#f43f5e;"></div>
+          <div class="terminal-dot" style="background:#f59e0b;"></div>
+          <div class="terminal-dot" style="background:#34d399;"></div>
+        </div>
+        <div class="url-bar">🔒 https://p2p.binance.com/trade/ETH</div>
+        <div style="font-size:11px; color:var(--text2);">Bob 的浏览器</div>
+      </div>
+      <div class="platform-body" id="platform-body">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <div style="font-size:18px; font-weight:700;">P2P 交易大厅</div>
+          <div style="font-size:12px; color:var(--text2);">已登录：Bob (0xBob...7f3e)</div>
+        </div>
+        <div class="trade-card" id="trade-card">
+          <div style="font-size:15px; font-weight:700; margin-bottom:14px;">📋 交易详情</div>
+          <div class="trade-row"><span class="trade-label">交易类型</span><span>P2P 买入</span></div>
+          <div class="trade-row"><span class="trade-label">资产</span><span style="font-weight:700;">10 ETH</span></div>
+          <div class="trade-row"><span class="trade-label">单价</span><span>2,580 USDT / ETH</span></div>
+          <div class="trade-row"><span class="trade-label">总价</span><span style="font-weight:700; color:var(--orange);">25,800 USDT</span></div>
+          <div class="trade-row"><span class="trade-label">卖方</span><span>Alice (0xAlice...8a2f)</span></div>
+          <div class="trade-row">
+            <span class="trade-label">卖方 KYC 状态</span>
+            <span class="kyc-badge pending" id="kyc-badge">⏳ 待验证</span>
+          </div>
+        </div>
+        <div id="platform-extra"></div>
+        <button class="action-btn primary" id="platform-btn" onclick="platformNext()" style="max-width:300px; margin:16px auto;">
+          🔍 请求卖方 KYC 证明
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- MODE C: Manual -->
+<!-- ═══════════════════════════════════════ -->
+<div class="mode-content" id="mode-manual">
+  <div class="phones-container" style="justify-content:center;">
+    <div class="platform-frame">
+      <div class="platform-topbar">
+        <div style="display:flex; gap:6px;">
+          <div class="terminal-dot" style="background:#f43f5e;"></div>
+          <div class="terminal-dot" style="background:#f59e0b;"></div>
+          <div class="terminal-dot" style="background:#34d399;"></div>
+        </div>
+        <div class="url-bar">Terminal — Bob 的电脑</div>
+        <div style="font-size:11px; color:var(--text2);">手动验证模式</div>
+      </div>
+      <div class="platform-body" id="manual-body">
+        <div style="font-size:15px; font-weight:700; margin-bottom:6px;">💻 手动验证 zkKYC 证明</div>
+        <div style="font-size:12px; color:var(--text2); margin-bottom:16px;">
+          类似 Binance Proof of Reserves — Bob 自行下载工具，本地验证 Alice 的证明
+        </div>
+        <div id="manual-content"></div>
+        <button class="action-btn primary" id="manual-btn" onclick="manualNext()" style="max-width:300px; margin:16px auto;">
+          ▶️ 开始手动验证流程
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom -->
+<div class="narrative">
+  <div class="step-indicator" id="step-dots"></div>
+  <div class="step-text" id="narrative-text">选择一个方案，点击开始</div>
+</div>
+
+<script>
+// ── Utils ──
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function addBubble(chatId, type, html) {
+  const chat = document.getElementById(chatId);
+  const d = document.createElement("div");
+  d.className = `bubble ${type}`;
+  d.innerHTML = html;
+  chat.appendChild(d);
+  chat.parentElement.scrollTop = chat.parentElement.scrollHeight;
+}
+function setNarrative(text) { document.getElementById("narrative-text").textContent = text; }
+async function apiCall(endpoint, data) {
+  const res = await fetch(endpoint, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(data || {}) });
+  return res.json();
+}
+
+// ── Mode switching ──
+let currentMode = "wallet";
+function switchMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll(".mode-tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".mode-content").forEach(c => c.classList.remove("active"));
+  document.querySelector(`.mode-tab[onclick="switchMode('${mode}')"]`).classList.add("active");
+  document.getElementById(`mode-${mode}`).classList.add("active");
+  const descs = {
+    wallet: "Alice 和 Bob 通过钱包直接 P2P 交易，SDK 自动完成验证",
+    platform: "Bob 在 P2P 交易平台上下单，平台自动请求并验证 Alice 的 KYC 证明",
+    manual: "类似 Binance PoS — Bob 下载开源工具，在本地终端手动验证 Alice 的证明",
+  };
+  document.getElementById("mode-desc").textContent = descs[mode];
+}
+
+// ═══════════════════════════════════════════
+// MODE A: Wallet
+// ═══════════════════════════════════════════
+let wStep = -1;
+const WALLET_STEPS = [
+  { narrative: "Alice 想从 Bob 那里购买 10 ETH，通过钱包发起 P2P 交易请求...",
+    fn: async () => {
+      document.getElementById("a-status-w").textContent = "在线";
+      document.getElementById("b-status-w").textContent = "在线";
+      addBubble("a-chat-w", "system", "🤝 P2P 交易请求");
+      addBubble("a-chat-w", "self", "Bob，我想买 10 ETH，可以吗？");
+      await sleep(500);
+      addBubble("b-chat-w", "system", "🤝 收到交易请求");
+      addBubble("b-chat-w", "other", "Bob，我想买 10 ETH，可以吗？");
+      await sleep(400);
+      addBubble("b-chat-w", "self", "可以，但我需要验证你的 KYC 状态。");
+      addBubble("a-chat-w", "other", "可以，但我需要验证你的 KYC 状态。");
+      const btn = document.getElementById("a-btn-w");
+      btn.textContent = "📜 查看我的凭证"; btn.className = "action-btn primary";
+    }},
+  { narrative: "Alice 的钱包里存着 Binance 签发的 KYC 凭证。个人信息只在她设备上，从不上传。",
+    fn: async () => {
+      await apiCall("/api/reset"); await apiCall("/api/issuer/setup");
+      const d = await apiCall("/api/user/kyc", { name:"张小明", country:"SG", id_number:"S1234567A", kyc_level:2 });
+      wState.did = d.result.holder_did;
+      addBubble("a-chat-w", "system", "📂 我的凭证库");
+      document.getElementById("a-chat-w").insertAdjacentHTML("beforeend", credCardHTML());
+      await sleep(400);
+      addBubble("a-chat-w", "self", "我有 KYC 凭证，生成零知识证明给你。");
+      addBubble("b-chat-w", "self", "好，这是我的挑战码。");
+      wState.nonce = rndHex();
+      addBubble("b-chat-w", "system", `🎲 挑战码: ${wState.nonce.substring(0,16)}...`);
+      addBubble("a-chat-w", "other", `🎲 挑战码: ${wState.nonce.substring(0,16)}...`);
+      const btn = document.getElementById("a-btn-w");
+      btn.textContent = "🔐 生成零知识证明"; btn.className = "action-btn primary";
+    }},
+  { narrative: "Alice 的钱包在本地生成 ZK 证明（不联网），然后发送给 Bob。Bob 的钱包自动验证。",
+    fn: async () => {
+      addBubble("a-chat-w", "system", "🔐 生成证明中...");
+      document.getElementById("a-status-w").textContent = "生成证明中...";
+      await sleep(600);
+      const d = await apiCall("/api/proof/generate", { holder_did:wState.did, verifier_nonce:wState.nonce, disclosed_fields:["kycLevel","sanctionClear","amlCheck","countryRisk"] });
+      wState.proof = d.result.presentation.proof;
+      document.getElementById("a-chat-w").insertAdjacentHTML("beforeend", proofCardHTML(d.result));
+      document.getElementById("a-status-w").textContent = "证明已生成 ✅";
+      await sleep(300);
+      addBubble("a-chat-w", "self", "📤 证明已发送");
+      // Bob auto verify
+      addBubble("b-chat-w", "system", "📥 收到证明，钱包自动验证中...");
+      document.getElementById("b-status-w").textContent = "自动验证中...";
+      await apiCall("/api/proof/verify", { proof:wState.proof, verifier_nonce:wState.nonce });
+      await sleep(800);
+      document.getElementById("b-chat-w").insertAdjacentHTML("beforeend", autoVerifyHTML());
+      await animateChecks("w");
+      addBubble("b-chat-w", "success", "✅ KYC 验证通过");
+      addBubble("b-chat-w", "self", "验证通过！可以成交。");
+      addBubble("a-chat-w", "other", "验证通过！可以成交。");
+      addBubble("a-chat-w", "success", "✅ Bob 确认了你的合规状态");
+      document.getElementById("b-status-w").textContent = "验证通过 ✅";
+      const btn = document.getElementById("a-btn-w");
+      btn.textContent = "💰 确认交易"; btn.className = "action-btn green";
+    }},
+  { narrative: "交易完成！全程 Alice 没有暴露任何个人信息，Bob 只知道她通过了 KYC。",
+    fn: async () => {
+      addBubble("a-chat-w", "success", "🎉 交易完成！+10 ETH");
+      addBubble("b-chat-w", "success", "🎉 交易完成！-10 ETH");
+      document.getElementById("a-status-w").textContent = "交易完成 🎉";
+      document.getElementById("b-status-w").textContent = "交易完成 🎉";
+      await sleep(400);
+      document.getElementById("a-chat-w").insertAdjacentHTML("beforeend", summaryAlice());
+      document.getElementById("b-chat-w").insertAdjacentHTML("beforeend", summaryBob());
+      const btn = document.getElementById("a-btn-w");
+      btn.textContent = "🔄 重新演示"; btn.className = "action-btn outline";
+      wStep = -2;
+    }},
+];
+const wState = { did:null, nonce:null, proof:null };
+async function walletNext() {
+  wStep++;
+  if (wStep >= WALLET_STEPS.length || wStep < 0) {
+    wStep = -1; resetWallet(); return;
+  }
+  document.getElementById("a-btn-w").disabled = true;
+  setNarrative(WALLET_STEPS[wStep].narrative);
+  await WALLET_STEPS[wStep].fn();
+  document.getElementById("a-btn-w").disabled = false;
+}
+function resetWallet() {
+  wStep = -1;
+  ["a-chat-w","b-chat-w"].forEach(id => document.getElementById(id).innerHTML = "");
+  document.getElementById("a-status-w").textContent = "等待开始...";
+  document.getElementById("b-status-w").textContent = "等待开始...";
+  const btn = document.getElementById("a-btn-w");
+  btn.textContent = "🚀 开始演示"; btn.className = "action-btn primary"; btn.disabled = false;
+  setNarrative("选择一个方案，点击开始");
+}
+
+// ═══════════════════════════════════════════
+// MODE B: Platform
+// ═══════════════════════════════════════════
+let pStep = -1;
+const PLATFORM_STEPS = [
+  { narrative: "Bob 在 P2P 平台上看到 Alice 的卖单，点击「请求 KYC 证明」。平台自动向 Alice 发送验证请求。",
+    fn: async () => {
+      await apiCall("/api/reset"); await apiCall("/api/issuer/setup");
+      const d = await apiCall("/api/user/kyc", { name:"张小明", country:"SG", id_number:"S1234567A", kyc_level:2 });
+      pState.did = d.result.holder_did;
+      pState.nonce = rndHex();
+      const badge = document.getElementById("kyc-badge");
+      badge.className = "kyc-badge checking"; badge.innerHTML = "🔄 请求中...";
+      const extra = document.getElementById("platform-extra");
+      extra.innerHTML = `
+        <div style="background:rgba(79,143,255,0.08); border:1px solid rgba(79,143,255,0.2); border-radius:10px; padding:14px; margin-bottom:16px;">
+          <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:8px;">📡 平台自动操作</div>
+          <div style="font-size:12px; color:var(--text2); line-height:1.8;" id="platform-log">
+            → 向 Alice 的钱包发送验证请求...<br>
+            → 附带随机挑战码: ${pState.nonce.substring(0,16)}...<br>
+          </div>
+        </div>`;
+      await sleep(800);
+      document.getElementById("platform-log").innerHTML += `→ Alice 的钱包收到请求，自动生成零知识证明...<br>`;
+      await sleep(600);
+      const pd = await apiCall("/api/proof/generate", { holder_did:pState.did, verifier_nonce:pState.nonce, disclosed_fields:["kycLevel","sanctionClear","amlCheck","countryRisk"] });
+      pState.proof = pd.result.presentation.proof;
+      document.getElementById("platform-log").innerHTML += `→ 收到 Alice 的证明（${pd.result.proof_size_bytes} 字节）<br>→ 开始自动验证...<br>`;
+      const btn = document.getElementById("platform-btn");
+      btn.textContent = "⏳ 验证中..."; btn.disabled = true;
+    }},
+  { narrative: "平台后台自动验证 Alice 的证明：从链上读取公钥和 Merkle 根，逐项检查。Bob 只需等待结果。",
+    fn: async () => {
+      await apiCall("/api/proof/verify", { proof:pState.proof, verifier_nonce:pState.nonce });
+      const log = document.getElementById("platform-log");
+      const checks = ["从链上读取发行方公钥 ✅","从链上读取 Merkle 根 ✅","验证 BBS+ 签名 ✅",
+        "验证 Merkle 成员证明 ✅","检查 Nullifier ✅","检查制裁状态 ✅","检查反洗钱 ✅","检查有效期 ✅"];
+      for (const c of checks) {
+        await sleep(350);
+        log.innerHTML += `<span style="color:var(--green);">✓</span> ${c}<br>`;
+        log.parentElement.scrollTop = log.parentElement.scrollHeight;
+      }
+      await sleep(300);
+      const badge = document.getElementById("kyc-badge");
+      badge.className = "kyc-badge verified"; badge.innerHTML = "✅ 已验证";
+      // Show verified details
+      document.getElementById("platform-extra").innerHTML += `
+        <div class="trade-card">
+          <div style="font-size:14px; font-weight:700; color:var(--green); margin-bottom:12px;">✅ 卖方 KYC 验证结果</div>
+          <div class="trade-row"><span class="trade-label">KYC 等级</span><span style="font-weight:700;">等级 2 (增强认证)</span></div>
+          <div class="trade-row"><span class="trade-label">制裁名单</span><span style="color:var(--green); font-weight:700;">✅ 未命中</span></div>
+          <div class="trade-row"><span class="trade-label">反洗钱</span><span style="color:var(--green); font-weight:700;">✅ 通过</span></div>
+          <div class="trade-row"><span class="trade-label">国家风险</span><span>低</span></div>
+          <div class="trade-row"><span class="trade-label">卖方姓名</span><span style="color:var(--text2);">🔒 未披露</span></div>
+          <div class="trade-row"><span class="trade-label">卖方国籍</span><span style="color:var(--text2);">🔒 未披露</span></div>
+          <div class="trade-row"><span class="trade-label">证件号码</span><span style="color:var(--text2);">🔒 未披露</span></div>
+          <div class="trade-row"><span class="trade-label">签发机构</span><span style="color:var(--text2);">🔒 未披露</span></div>
+        </div>`;
+      const btn = document.getElementById("platform-btn");
+      btn.textContent = "💰 确认购买 10 ETH"; btn.className = "action-btn green"; btn.disabled = false;
+    }},
+  { narrative: "验证通过！Bob 确认购买。全程 Bob 只点了两个按钮，所有验证由平台自动完成。",
+    fn: async () => {
+      document.getElementById("platform-extra").innerHTML += `
+        <div style="text-align:center; padding:20px;">
+          <div style="font-size:40px;">🎉</div>
+          <div style="font-size:18px; font-weight:700; color:var(--green); margin:8px 0;">交易完成！</div>
+          <div style="font-size:13px; color:var(--text2);">10 ETH 已安全转入 Bob 的钱包</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="summary-box">
+            <div class="stitle" style="color:var(--green);">✅ Bob 确认了</div>
+            对方通过了大机构 KYC<br>对方不在制裁名单<br>对方反洗钱通过<br>对方国家风险低
+          </div>
+          <div class="summary-box">
+            <div class="stitle" style="color:var(--red);">🔒 Bob 不知道</div>
+            对方真实姓名<br>对方国籍<br>对方证件号<br>哪家机构签发<br>对方其他交易
+          </div>
+        </div>`;
+      const btn = document.getElementById("platform-btn");
+      btn.textContent = "🔄 重新演示"; btn.className = "action-btn outline";
+      pStep = -2;
+    }},
+];
+const pState = { did:null, nonce:null, proof:null };
+async function platformNext() {
+  pStep++;
+  if (pStep >= PLATFORM_STEPS.length || pStep < 0) { pStep = -1; resetPlatform(); return; }
+  document.getElementById("platform-btn").disabled = true;
+  setNarrative(PLATFORM_STEPS[pStep].narrative);
+  await PLATFORM_STEPS[pStep].fn();
+  if (pStep >= 0) document.getElementById("platform-btn").disabled = false;
+}
+function resetPlatform() {
+  pStep = -1;
+  document.getElementById("kyc-badge").className = "kyc-badge pending";
+  document.getElementById("kyc-badge").innerHTML = "⏳ 待验证";
+  document.getElementById("platform-extra").innerHTML = "";
+  const btn = document.getElementById("platform-btn");
+  btn.textContent = "🔍 请求卖方 KYC 证明"; btn.className = "action-btn primary"; btn.disabled = false;
+  setNarrative("选择一个方案，点击开始");
+}
+
+// ═══════════════════════════════════════════
+// MODE C: Manual
+// ═══════════════════════════════════════════
+let mStep = -1;
+const MANUAL_STEPS = [
+  { narrative: "第一步：Bob 从 GitHub 下载 zkKYC 开源验证工具。任何人都可以审计代码。",
+    fn: async () => {
+      await apiCall("/api/reset"); await apiCall("/api/issuer/setup");
+      const d = await apiCall("/api/user/kyc", { name:"张小明", country:"SG", id_number:"S1234567A", kyc_level:2 });
+      mState.did = d.result.holder_did;
+      const mc = document.getElementById("manual-content");
+      mc.innerHTML = `
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dot" style="background:#f43f5e;"></div>
+            <div class="terminal-dot" style="background:#f59e0b;"></div>
+            <div class="terminal-dot" style="background:#34d399;"></div>
+            <span style="margin-left:8px; font-size:11px; color:var(--text2);">bob@macbook ~ %</span>
+          </div>
+          <div class="terminal-body" id="term-output"></div>
+        </div>`;
+      const term = document.getElementById("term-output");
+      await typeLines(term, [
+        { text: "$ git clone https://github.com/binance/zkkyc-verifier.git", cls: "cmd" },
+        { text: "Cloning into 'zkkyc-verifier'...", cls: "output" },
+        { text: "remote: Enumerating objects: 156, done.", cls: "output" },
+        { text: "Receiving objects: 100% (156/156), 2.3 MiB | 8.5 MiB/s, done.", cls: "output" },
+        { text: "", cls: "" },
+        { text: "$ cd zkkyc-verifier && pip install -r requirements.txt", cls: "cmd" },
+        { text: "Successfully installed ecdsa-0.19.0 fastapi-0.115.0", cls: "output" },
+        { text: "", cls: "" },
+        { text: "# ✅ 验证工具安装完成", cls: "comment" },
+      ], 200);
+      const btn = document.getElementById("manual-btn");
+      btn.textContent = "📥 获取 Alice 的证明文件"; btn.className = "action-btn primary";
+    }},
+  { narrative: "第二步：Alice 导出证明文件（proof.json），通过任意方式发给 Bob。",
+    fn: async () => {
+      mState.nonce = rndHex();
+      const pd = await apiCall("/api/proof/generate", { holder_did:mState.did, verifier_nonce:mState.nonce, disclosed_fields:["kycLevel","sanctionClear","amlCheck","countryRisk"] });
+      mState.proof = pd.result.presentation.proof;
+      const term = document.getElementById("term-output");
+      await typeLines(term, [
+        { text: "", cls: "" },
+        { text: "# Alice 把证明文件发给 Bob（邮件/聊天/U盘都行）", cls: "comment" },
+        { text: "$ ls -la proof.json", cls: "cmd" },
+        { text: `-rw-r--r--  1 bob  staff  ${pd.result.proof_size_bytes} Feb 21 15:40 proof.json`, cls: "output" },
+        { text: "", cls: "" },
+        { text: "$ cat proof.json | python -m json.tool | head -10", cls: "cmd" },
+        { text: '{', cls: "output" },
+        { text: '  "type": "zkKYCProof2026",', cls: "output" },
+        { text: `  "nullifier": "${mState.proof.nullifier.substring(0,32)}...",`, cls: "output" },
+        { text: '  "selectiveDisclosure": { ... },', cls: "output" },
+        { text: '  "revocationProof": { ... },', cls: "output" },
+        { text: '  ...', cls: "output" },
+        { text: '}', cls: "output" },
+        { text: "", cls: "" },
+        { text: "# 注意：proof.json 里没有任何个人信息", cls: "comment" },
+        { text: "$ grep -i 'name\\|passport\\|identity' proof.json", cls: "cmd" },
+        { text: "# （无输出 — 没有匹配）", cls: "comment" },
+      ], 180);
+      const btn = document.getElementById("manual-btn");
+      btn.textContent = "🔍 运行验证程序"; btn.className = "action-btn primary";
+    }},
+  { narrative: "第三步：Bob 运行验证程序。程序自动从链上读取公钥和 Merkle 根，逐项检查。",
+    fn: async () => {
+      const vd = await apiCall("/api/proof/verify", { proof:mState.proof, verifier_nonce:mState.nonce });
+      const term = document.getElementById("term-output");
+      await typeLines(term, [
+        { text: "", cls: "" },
+        { text: "$ python verify.py --proof proof.json --chain bnb-mainnet", cls: "cmd" },
+        { text: "", cls: "" },
+        { text: "╔══════════════════════════════════════════════════╗", cls: "output" },
+        { text: "║          zkKYC Proof Verifier v1.0.0            ║", cls: "output" },
+        { text: "╚══════════════════════════════════════════════════╝", cls: "output" },
+        { text: "", cls: "" },
+        { text: "[1/8] 连接 BNB Chain RPC...", cls: "output" },
+      ], 150);
+      await sleep(300);
+      const checks = [
+        "[2/8] 从链上读取发行方公钥... ✅",
+        "[3/8] 从链上读取 Merkle 根... ✅",
+        "[4/8] 验证 BBS+ 签名... ✅ (签名有效，发行方确认)",
+        "[5/8] 验证 Merkle 成员证明... ✅ (凭证在有效集合中)",
+        "[6/8] 检查 Nullifier... ✅ (首次使用，非重放)",
+        "[7/8] 检查制裁 & 反洗钱... ✅ (sanctionClear=true, amlCheck=passed)",
+        "[8/8] 检查凭证有效期... ✅ (未过期)",
+      ];
+      for (const c of checks) {
+        await sleep(400);
+        await typeLines(term, [{ text: c, cls: "success" }], 0);
+      }
+      await sleep(300);
+      await typeLines(term, [
+        { text: "", cls: "" },
+        { text: "════════════════════════════════════════════════════", cls: "success" },
+        { text: "  ✅ 验证结果：证明有效 (VALID)", cls: "success" },
+        { text: "════════════════════════════════════════════════════", cls: "success" },
+        { text: "", cls: "" },
+        { text: "  已确认信息：", cls: "output" },
+        { text: "    KYC 等级:    2 (增强认证)", cls: "output" },
+        { text: "    制裁检查:    ✅ 通过", cls: "output" },
+        { text: "    反洗钱:      ✅ 通过", cls: "output" },
+        { text: "    国家风险:    低", cls: "output" },
+        { text: "", cls: "" },
+        { text: "  未披露信息：", cls: "output" },
+        { text: "    姓名:        🔒 (零知识隐藏)", cls: "output" },
+        { text: "    国籍:        🔒 (零知识隐藏)", cls: "output" },
+        { text: "    证件号:      🔒 (零知识隐藏)", cls: "output" },
+        { text: "    签发机构:    🔒 (零知识隐藏)", cls: "output" },
+        { text: "", cls: "" },
+        { text: "  验证数据来源：", cls: "comment" },
+        { text: "    公钥:    BNB Chain 合约 0xRegistry...（链上读取）", cls: "comment" },
+        { text: "    Merkle:  BNB Chain 合约 0xRegistry...（链上读取）", cls: "comment" },
+        { text: "    代码:    github.com/binance/zkkyc-verifier（开源可审计）", cls: "comment" },
+      ], 80);
+      const btn = document.getElementById("manual-btn");
+      btn.textContent = "🔄 重新演示"; btn.className = "action-btn outline";
+      mStep = -2;
+    }},
+];
+const mState = { did:null, nonce:null, proof:null };
+async function manualNext() {
+  mStep++;
+  if (mStep >= MANUAL_STEPS.length || mStep < 0) { mStep = -1; resetManual(); return; }
+  document.getElementById("manual-btn").disabled = true;
+  setNarrative(MANUAL_STEPS[mStep].narrative);
+  await MANUAL_STEPS[mStep].fn();
+  document.getElementById("manual-btn").disabled = false;
+}
+function resetManual() {
+  mStep = -1;
+  document.getElementById("manual-content").innerHTML = "";
+  const btn = document.getElementById("manual-btn");
+  btn.textContent = "▶️ 开始手动验证流程"; btn.className = "action-btn primary"; btn.disabled = false;
+  setNarrative("选择一个方案，点击开始");
+}
+
+// ── Helpers ──
+function rndHex() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2,"0")).join(""); }
+function credCardHTML() {
+  return `<div class="cred-card">
+    <div class="cred-header"><div class="cred-title">🏛️ Binance KYC 凭证</div><div class="cred-badge">✅ 有效</div></div>
+    <div class="cred-row"><span class="cred-label">KYC 等级</span><span class="cred-val">等级 2 增强认证</span></div>
+    <div class="cred-row"><span class="cred-label">制裁检查</span><span class="cred-val" style="color:var(--green)">✅ 通过</span></div>
+    <div class="cred-row"><span class="cred-label">反洗钱</span><span class="cred-val" style="color:var(--green)">✅ 通过</span></div>
+    <div class="cred-row"><span class="cred-label">国家风险</span><span class="cred-val">低</span></div>
+    <div class="cred-row"><span class="cred-label">姓名</span><span class="cred-hidden">🔒 仅本机可见</span></div>
+    <div class="cred-row"><span class="cred-label">国籍</span><span class="cred-hidden">🔒 仅本机可见</span></div>
+    <div class="cred-row"><span class="cred-label">证件号</span><span class="cred-hidden">🔒 仅本机可见</span></div>
+  </div>`;
+}
+function proofCardHTML(r) {
+  return `<div class="proof-card">
+    <div class="proof-title">🔐 零知识证明已生成</div>
+    <div class="proof-item"><span class="dot green"></span> 已证明：通过 KYC（等级 2）</div>
+    <div class="proof-item"><span class="dot green"></span> 已证明：不在制裁名单</div>
+    <div class="proof-item"><span class="dot green"></span> 已证明：反洗钱通过</div>
+    <div class="proof-item"><span class="dot green"></span> 已证明：国家风险低</div>
+    <div class="proof-item"><span class="dot red"></span> 已隐藏：姓名、国籍、证件号</div>
+    <div style="margin-top:8px; font-size:10px; color:rgba(255,255,255,0.35);">
+      大小: ${r.proof_size_bytes} 字节 | Nullifier: ${r.nullifier.substring(0,12)}...
+    </div>
+  </div>`;
+}
+function autoVerifyHTML() {
+  let h = '<div class="verify-card"><div style="font-size:12px; font-weight:700; margin-bottom:6px; color:var(--blue);">🔍 钱包自动验证</div>';
+  const items = ["从链上获取发行方公钥","从链上获取 Merkle 根","验证 BBS+ 签名","验证 Merkle 成员证明","检查 Nullifier","检查制裁状态","检查反洗钱","检查有效期"];
+  items.forEach((t,i) => { h += `<div class="verify-item" id="wcheck-${i}" style="opacity:0.3;"><span class="vi-icon" style="background:var(--border);">⏳</span><span>${t}</span></div>`; });
+  return h + '</div>';
+}
+async function animateChecks(prefix) {
+  for (let i = 0; i < 8; i++) {
+    await sleep(300);
+    const el = document.getElementById(`${prefix}check-${i}`);
+    el.style.opacity = "1";
+    const icon = el.querySelector(".vi-icon");
+    icon.textContent = "✓"; icon.style.background = "var(--green)"; icon.style.color = "#000";
+  }
+}
+function summaryAlice() {
+  return `<div class="summary-box"><div class="stitle" style="color:var(--cyan);">📊 隐私保护报告</div>
+    ✅ 证明了 KYC 合规<br>✅ 证明了未被制裁<br>✅ 证明了反洗钱通过<br>
+    🔒 姓名未暴露<br>🔒 国籍未暴露<br>🔒 证件号未暴露<br>🔒 交易不可关联</div>`;
+}
+function summaryBob() {
+  return `<div class="summary-box"><div class="stitle" style="color:var(--cyan);">📊 我看到了什么</div>
+    ✅ 对方通过大机构 KYC<br>✅ 对方不在制裁名单<br>✅ 对方反洗钱通过<br>
+    ❌ 不知道对方姓名<br>❌ 不知道对方国籍<br>❌ 不知道证件号<br>❌ 不知道哪家机构</div>`;
+}
+async function typeLines(container, lines, delay) {
+  for (const line of lines) {
+    const div = document.createElement("div");
+    if (line.cls) div.className = line.cls;
+    div.textContent = line.text;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    if (delay > 0) await sleep(delay);
+  }
+}
+</script>
+</body>
+</html>
