@@ -489,3 +489,20 @@ body {
 }
 .vt-step.done .vt-status { color: var(--green); }
 .vt-step.fail .vt-status { color: var(--red); }
+
+/* ── Language Toggle ── */
+.lang-toggle {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.lang-toggle:hover {
+  border-color: var(--accent);
+  background: rgba(88,166,255,0.1);
+}

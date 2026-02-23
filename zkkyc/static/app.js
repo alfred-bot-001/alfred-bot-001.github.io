@@ -128,8 +128,9 @@ function prettyJSON(obj) {
     .replace(/:\s*(\d+)/g, ': <span class="json-number">$1</span>')
     .replace(/:\s*(true|false|null)/g, ': <span class="json-bool">$1</span>');
 
-  // Add Chinese comments after known keys
-  for (const [key, comment] of Object.entries(JSON_COMMENTS)) {
+  // Add comments after known keys (i18n-aware)
+  const activeComments = (typeof getJsonComments === 'function') ? getJsonComments() : JSON_COMMENTS;
+  for (const [key, comment] of Object.entries(activeComments)) {
     const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const spanKey = `<span class="json-key">${key}</span>`;
     const escapedSpanKey = spanKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

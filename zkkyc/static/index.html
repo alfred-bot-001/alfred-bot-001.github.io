@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-page="index">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>zkKYC — 零知识 KYC 凭证系统</title>
   <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
 </head>
 <body>
 
 <!-- Header -->
 <div class="header">
   <div>
-    <h1>🔐 zkKYC 演示</h1>
-    <div class="subtitle">零知识 KYC 凭证系统 — 链上 P2P 交易隐私合规方案</div>
+    <h1 data-i18n="header.title">🔐 zkKYC 演示</h1>
+    <div class="subtitle" data-i18n="header.subtitle">零知识 KYC 凭证系统 — 链上 P2P 交易隐私合规方案</div>
   </div>
   <div class="status-bar">
-    <a href="/user-demo.html" style="font-size:12px; color:var(--accent); text-decoration:none; padding:6px 14px; border:1px solid var(--accent); border-radius:20px;">👤 切换到用户视角</a>
-    <div class="stat"><span class="dot off" id="dot-issuer"></span> 发行方</div>
-    <div class="stat"><span class="dot off" id="dot-user"></span> 用户</div>
-    <div class="stat"><span class="dot off" id="dot-proof"></span> 证明</div>
+    <button class="lang-toggle" onclick="toggleLang()">EN</button>
+    <a href="/user-demo.html" style="font-size:12px; color:var(--accent); text-decoration:none; padding:6px 14px; border:1px solid var(--accent); border-radius:20px;" data-i18n="header.switch-view">👤 切换到用户视角</a>
+    <div class="stat"><span class="dot off" id="dot-issuer"></span> <span data-i18n="header.issuer">发行方</span></div>
+    <div class="stat"><span class="dot off" id="dot-user"></span> <span data-i18n="header.user">用户</span></div>
+    <div class="stat"><span class="dot off" id="dot-proof"></span> <span data-i18n="header.proof">证明</span></div>
     <div class="stat" id="stat-creds">凭证数: 0</div>
     <div class="stat" id="stat-verifs">验证数: 0</div>
   </div>
@@ -27,13 +29,13 @@
 <div class="container">
   <!-- Step Navigation -->
   <div class="steps-nav">
-    <button class="step-btn active" onclick="showStep(1)">① 发行方初始化</button>
-    <button class="step-btn" onclick="showStep(2)">② KYC & 凭证签发</button>
-    <button class="step-btn" onclick="showStep(3)">③ P2P 交易请求</button>
-    <button class="step-btn" onclick="showStep(4)">④ 生成 ZK 证明</button>
-    <button class="step-btn" onclick="showStep(5)">⑤ 验证证明</button>
-    <button class="step-btn" onclick="showStep(6)">⑥ 凭证撤销</button>
-    <button class="step-btn" onclick="showStep(7)">⑦ 不可关联性</button>
+    <button class="step-btn active" onclick="showStep(1)" data-i18n="step.1">① 发行方初始化</button>
+    <button class="step-btn" onclick="showStep(2)" data-i18n="step.2">② KYC & 凭证签发</button>
+    <button class="step-btn" onclick="showStep(3)" data-i18n="step.3">③ P2P 交易请求</button>
+    <button class="step-btn" onclick="showStep(4)" data-i18n="step.4">④ 生成 ZK 证明</button>
+    <button class="step-btn" onclick="showStep(5)" data-i18n="step.5">⑤ 验证证明</button>
+    <button class="step-btn" onclick="showStep(6)" data-i18n="step.6">⑥ 凭证撤销</button>
+    <button class="step-btn" onclick="showStep(7)" data-i18n="step.7">⑦ 不可关联性</button>
   </div>
 
   <!-- ════════════════════════════════════════════ -->
@@ -43,28 +45,28 @@
     <div class="main-grid">
       <div class="panel">
         <div class="panel-header">
-          <h2>🏛️ 初始化发行方</h2>
-          <span class="badge">第 1 步 / 共 7 步</span>
+          <h2 data-i18n="s1.title">🏛️ 初始化发行方</h2>
+          <span class="badge" data-i18n="s1.badge">第 1 步 / 共 7 步</span>
         </div>
         <div class="panel-body">
-          <p style="color:var(--text2); margin-bottom:20px;">
+          <p style="color:var(--text2); margin-bottom:20px;" data-i18n="s1.desc">
             发行方（如 Binance）建立去中心化身份和密码学密钥。这是一次性的信任锚点设置。
           </p>
           <button class="btn btn-primary" id="btn-setup" onclick="setupIssuer()">
             <span class="spinner"></span>
-            🚀 初始化 Binance 为发行方
+            <span data-i18n="s1.btn">🚀 初始化 Binance 为发行方</span>
           </button>
           <div id="issuer-result" class="json-view" style="display:none;"></div>
         </div>
       </div>
       <div class="panel explanation">
-        <div class="panel-header"><h2>📖 技术解析</h2></div>
+        <div class="panel-header"><h2 data-i18n="s1.exp.title">📖 技术解析</h2></div>
         <div class="panel-body" id="exp-1">
-          <div class="exp-title">第一步：发行方初始化</div>
-          <p style="color:var(--text2); margin-bottom:16px;">
+          <div class="exp-title" data-i18n="s1.exp.heading">第一步：发行方初始化</div>
+          <p style="color:var(--text2); margin-bottom:16px;" data-i18n="s1.exp.desc">
             在签发任何 KYC 凭证之前，发行方需要通过 DID（去中心化标识符）在区块链上建立身份。
           </p>
-          <div class="exp-technical">点击"初始化"后会发生什么：
+          <div class="exp-technical" data-i18n="s1.exp.technical">点击"初始化"后会发生什么：
 
 1. 生成 ECDSA P-256 椭圆曲线密钥对（私钥 + 公钥）
 2. 从公钥哈希推导出 DID 标识符
@@ -73,7 +75,7 @@
 
 公钥被公开发布，任何人都可以用它来验证
 该发行方签发的凭证。</div>
-          <div class="exp-next">👉 点击按钮开始演示</div>
+          <div class="exp-next" data-i18n="s1.exp.next">👉 点击按钮开始演示</div>
         </div>
       </div>
     </div>
@@ -86,45 +88,45 @@
     <div class="main-grid">
       <div class="panel">
         <div class="panel-header">
-          <h2>📋 提交 KYC 并获取凭证</h2>
-          <span class="badge">第 2 步 / 共 7 步</span>
+          <h2 data-i18n="s2.title">📋 提交 KYC 并获取凭证</h2>
+          <span class="badge" data-i18n="s2.badge">第 2 步 / 共 7 步</span>
         </div>
         <div class="panel-body">
           <div class="form-group">
-            <label>姓名</label>
+            <label data-i18n="s2.label.name">姓名</label>
             <input type="text" id="kyc-name" value="张小明" />
           </div>
           <div class="form-group">
-            <label>国家代码</label>
+            <label data-i18n="s2.label.country">国家代码</label>
             <input type="text" id="kyc-country" value="SG" maxlength="2" />
           </div>
           <div class="form-group">
-            <label>证件号码</label>
+            <label data-i18n="s2.label.id">证件号码</label>
             <input type="text" id="kyc-id" value="S1234567A" />
           </div>
           <div class="form-group">
-            <label>KYC 等级</label>
+            <label data-i18n="s2.label.level">KYC 等级</label>
             <select id="kyc-level">
-              <option value="1">等级 1 — 基础认证</option>
-              <option value="2" selected>等级 2 — 增强认证</option>
-              <option value="3">等级 3 — 机构级认证</option>
+              <option value="1" data-i18n="s2.level.1">等级 1 — 基础认证</option>
+              <option value="2" selected data-i18n="s2.level.2">等级 2 — 增强认证</option>
+              <option value="3" data-i18n="s2.level.3">等级 3 — 机构级认证</option>
             </select>
           </div>
           <button class="btn btn-primary" id="btn-kyc" onclick="submitKYC()">
             <span class="spinner"></span>
-            📜 完成 KYC 并签发凭证
+            <span data-i18n="s2.btn">📜 完成 KYC 并签发凭证</span>
           </button>
           <div id="kyc-result" class="json-view" style="display:none;"></div>
         </div>
       </div>
       <div class="panel explanation">
-        <div class="panel-header"><h2>📖 技术解析</h2></div>
+        <div class="panel-header"><h2 data-i18n="s2.exp.title">📖 技术解析</h2></div>
         <div class="panel-body" id="exp-2">
-          <div class="exp-title">第二步：KYC 与凭证签发</div>
-          <p style="color:var(--text2); margin-bottom:16px;">
+          <div class="exp-title" data-i18n="s2.exp.heading">第二步：KYC 与凭证签发</div>
+          <p style="color:var(--text2); margin-bottom:16px;" data-i18n="s2.exp.desc">
             用户向发行方提交 KYC 信息。验证通过后，发行方创建一份用 BBS+ 签名的 W3C 可验证凭证。
           </p>
-          <div class="exp-technical">KYC 过程中发生了什么：
+          <div class="exp-technical" data-i18n="s2.exp.technical">KYC 过程中发生了什么：
 
 1. 用户提交个人信息（姓名、国籍、证件号）
 2. 发行方验证身份（本演示中为模拟）
@@ -136,7 +138,7 @@
 
 ⚠️ 完成后，用户的个人信息仅存储在自己的
 设备上，不会上链，也不会留在发行方。</div>
-          <div class="exp-next">👉 填写表单并签发凭证</div>
+          <div class="exp-next" data-i18n="s2.exp.next">👉 填写表单并签发凭证</div>
         </div>
       </div>
     </div>
@@ -149,21 +151,21 @@
     <div class="main-grid">
       <div class="panel">
         <div class="panel-header">
-          <h2>🤝 P2P 交易请求</h2>
-          <span class="badge">第 3 步 / 共 7 步</span>
+          <h2 data-i18n="s3.title">🤝 P2P 交易请求</h2>
+          <span class="badge" data-i18n="s3.badge">第 3 步 / 共 7 步</span>
         </div>
         <div class="panel-body">
           <div class="wallet-row">
             <div class="wallet-card">
-              <h3>👩 Alice（持有方）</h3>
-              <div class="addr" id="alice-did">DID: 尚未创建</div>
-              <div style="margin-top:10px; color:var(--green); font-size:13px;">✅ 已持有 KYC 凭证</div>
+              <h3 data-i18n="s3.alice">👩 Alice（持有方）</h3>
+              <div class="addr" id="alice-did" data-i18n="s3.alice.did">DID: 尚未创建</div>
+              <div style="margin-top:10px; color:var(--green); font-size:13px;" data-i18n="s3.alice.status">✅ 已持有 KYC 凭证</div>
             </div>
             <div class="arrow-col">⇄</div>
             <div class="wallet-card">
-              <h3>👨 Bob（验证方）</h3>
+              <h3 data-i18n="s3.bob">👨 Bob（验证方）</h3>
               <div class="addr">0xBob...7f3e</div>
-              <div style="margin-top:10px; color:var(--orange); font-size:13px;">⚠️ 需要对方的 KYC 证明</div>
+              <div style="margin-top:10px; color:var(--orange); font-size:13px;" data-i18n="s3.bob.status">⚠️ 需要对方的 KYC 证明</div>
             </div>
           </div>
           <div style="margin-top:20px; padding:16px; background:var(--bg); border-radius:8px;">
@@ -174,18 +176,18 @@
             </p>
             <div style="display:flex; gap:10px; align-items:center;">
               <input type="text" id="verifier-nonce" readonly style="font-family:monospace; font-size:12px; flex:1;" />
-              <button class="btn btn-secondary" onclick="generateNonce()">🎲 新随机数</button>
+              <button class="btn btn-secondary" onclick="generateNonce()" data-i18n="s3.nonce.btn">🎲 新随机数</button>
             </div>
           </div>
           <button class="btn btn-primary" style="margin-top:16px;" onclick="generateNonce(); showStep(4);">
-            ➡️ 进入证明生成
+            <span data-i18n="s3.next.btn">➡️ 进入证明生成</span>
           </button>
         </div>
       </div>
       <div class="panel explanation">
-        <div class="panel-header"><h2>📖 技术解析</h2></div>
+        <div class="panel-header"><h2 data-i18n="s3.exp.title">📖 技术解析</h2></div>
         <div class="panel-body" id="exp-3">
-          <div class="exp-title">第三步：P2P 交易场景</div>
+          <div class="exp-title" data-i18n="s3.exp.heading">第三步：P2P 交易场景</div>
           <p style="color:var(--text2); margin-bottom:16px;">
             双方要在链上做 P2P 转账。双方都没有链上 KYC，但 Bob 需要确认 Alice 的合规状态。
           </p>
@@ -216,8 +218,8 @@
     <div class="main-grid">
       <div class="panel">
         <div class="panel-header">
-          <h2>🔐 生成零知识证明</h2>
-          <span class="badge">第 4 步 / 共 7 步</span>
+          <h2 data-i18n="s4.title">🔐 生成零知识证明</h2>
+          <span class="badge" data-i18n="s4.badge">第 4 步 / 共 7 步</span>
         </div>
         <div class="panel-body">
           <p style="color:var(--text2); margin-bottom:16px;">
@@ -251,15 +253,15 @@
           </div>
           <button class="btn btn-primary" id="btn-proof" onclick="generateProof()">
             <span class="spinner"></span>
-            🔐 生成零知识证明
+            <span data-i18n="s4.btn">🔐 生成零知识证明</span>
           </button>
           <div id="proof-result" class="json-view" style="display:none;"></div>
         </div>
       </div>
       <div class="panel explanation">
-        <div class="panel-header"><h2>📖 技术解析</h2></div>
+        <div class="panel-header"><h2 data-i18n="s4.exp.title">📖 技术解析</h2></div>
         <div class="panel-body" id="exp-4">
-          <div class="exp-title">第四步：零知识证明生成</div>
+          <div class="exp-title" data-i18n="s4.exp.heading">第四步：零知识证明生成</div>
           <div class="exp-technical">Alice 的设备在本地执行以下操作：
 
 1. 选择性披露（BBS+ 签名）
@@ -298,8 +300,8 @@
     <!-- 验证流程图 -->
     <div class="panel" style="margin-bottom:24px;">
       <div class="panel-header">
-        <h2>🔍 Bob 的完整验证流程</h2>
-        <span class="badge">第 5 步 / 共 7 步</span>
+        <h2 data-i18n="s5.title">🔍 Bob 的完整验证流程</h2>
+        <span class="badge" data-i18n="s5.badge">第 5 步 / 共 7 步</span>
       </div>
       <div class="panel-body">
         <!-- 流程时间线 -->
@@ -309,8 +311,8 @@
           <div class="vt-step" id="vt-step-0">
             <div class="vt-icon">⛓️</div>
             <div class="vt-content">
-              <div class="vt-title">第零步：从链上获取信任锚点</div>
-              <div class="vt-desc">Bob 自己从链上合约读取数据，不依赖 Alice，Alice 无法伪造</div>
+              <div class="vt-title" data-i18n="s5.vt0.title">第零步：从链上获取信任锚点</div>
+              <div class="vt-desc" data-i18n="s5.vt0.desc">Bob 自己从链上合约读取数据，不依赖 Alice，Alice 无法伪造</div>
               <div class="vt-detail">
                 <div class="vt-code">
                   <div><span class="json-key">issuer_pubkey</span> = Registry.getIssuer().publicKey &nbsp; <span style="color:var(--text2)">← 链上读取</span></div>
@@ -329,8 +331,8 @@
           <div class="vt-step" id="vt-step-1">
             <div class="vt-icon">🔏</div>
             <div class="vt-content">
-              <div class="vt-title">第一步：验证 BBS+ 签名</div>
-              <div class="vt-desc">发行方真的签了这些字段吗？</div>
+              <div class="vt-title" data-i18n="s5.vt1.title">第一步：验证 BBS+ 签名</div>
+              <div class="vt-desc" data-i18n="s5.vt1.desc">发行方真的签了这些字段吗？</div>
               <div class="vt-detail">
                 <div class="vt-code">
                   <div><span style="color:var(--text2)">// 对每个披露字段：验证承诺能正确打开</span></div>
@@ -355,8 +357,8 @@
           <div class="vt-step" id="vt-step-2">
             <div class="vt-icon">🌳</div>
             <div class="vt-content">
-              <div class="vt-title">第二步：验证 Merkle 证明（凭证没被撤销？）</div>
-              <div class="vt-desc">凭证是否仍在有效集合中</div>
+              <div class="vt-title" data-i18n="s5.vt2.title">第二步：验证 Merkle 证明（凭证没被撤销？）</div>
+              <div class="vt-desc" data-i18n="s5.vt2.desc">凭证是否仍在有效集合中</div>
               <div class="vt-detail">
                 <div class="vt-code">
                   <div><span style="color:var(--text2)">// Alice 提供的 Merkle 路径</span></div>
@@ -385,8 +387,8 @@
           <div class="vt-step" id="vt-step-3">
             <div class="vt-icon">🛡️</div>
             <div class="vt-content">
-              <div class="vt-title">第三步：检查 Nullifier（防重放）</div>
-              <div class="vt-desc">这个证明之前用过吗？</div>
+              <div class="vt-title" data-i18n="s5.vt3.title">第三步：检查 Nullifier（防重放）</div>
+              <div class="vt-desc" data-i18n="s5.vt3.desc">这个证明之前用过吗？</div>
               <div class="vt-detail">
                 <div class="vt-code">
                   <div>nullifier = proof.nullifier</div>
@@ -410,8 +412,8 @@
           <div class="vt-step" id="vt-step-4">
             <div class="vt-icon">📋</div>
             <div class="vt-content">
-              <div class="vt-title">第四步：检查业务合规字段</div>
-              <div class="vt-desc">从已验证的披露字段中读取合规状态</div>
+              <div class="vt-title" data-i18n="s5.vt4.title">第四步：检查业务合规字段</div>
+              <div class="vt-desc" data-i18n="s5.vt4.desc">从已验证的披露字段中读取合规状态</div>
               <div class="vt-detail">
                 <div class="vt-code">
                   <div>sanctionClear == <span class="json-bool">true</span> &nbsp;&nbsp; <span style="color:var(--text2)">→ 不在制裁名单</span> <span style="color:var(--green)">✓</span></div>
@@ -432,8 +434,8 @@
           <div class="vt-step" id="vt-step-5">
             <div class="vt-icon">⏰</div>
             <div class="vt-content">
-              <div class="vt-title">第五步：过期检查</div>
-              <div class="vt-desc">凭证是否仍在有效期内</div>
+              <div class="vt-title" data-i18n="s5.vt5.title">第五步：过期检查</div>
+              <div class="vt-desc" data-i18n="s5.vt5.desc">凭证是否仍在有效期内</div>
               <div class="vt-detail">
                 <div class="vt-code">
                   <div>proof.expirationProof.notExpired == <span class="json-bool">true</span> <span style="color:var(--green)">✓</span></div>
@@ -458,7 +460,7 @@
         <div style="text-align:center; margin-top:24px;">
           <button class="btn btn-primary" id="btn-verify" onclick="verifyProofAnimated()" style="font-size:16px; padding:14px 32px;">
             <span class="spinner"></span>
-            🔍 开始逐步验证（以 Bob 身份）
+            <span data-i18n="s5.btn">🔍 开始逐步验证（以 Bob 身份）</span>
           </button>
         </div>
 
@@ -466,8 +468,8 @@
         <div id="bob-knowledge" style="display:none; margin-top:24px;">
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
             <div style="padding:16px; background:rgba(63,185,80,0.08); border:1px solid rgba(63,185,80,0.2); border-radius:8px;">
-              <div style="font-weight:700; color:var(--green); margin-bottom:10px;">✅ Bob 知道的</div>
-              <div style="font-size:13px; color:var(--text2); line-height:1.8;">
+              <div style="font-weight:700; color:var(--green); margin-bottom:10px;" data-i18n="s5.bob.knows">✅ Bob 知道的</div>
+              <div style="font-size:13px; color:var(--text2); line-height:1.8;" data-i18n="s5.bob.knows.list">
                 • Alice 通过了某大机构的 KYC<br>
                 • Alice 不在制裁名单<br>
                 • Alice 反洗钱检查已通过<br>
@@ -476,8 +478,8 @@
               </div>
             </div>
             <div style="padding:16px; background:rgba(248,81,73,0.08); border:1px solid rgba(248,81,73,0.2); border-radius:8px;">
-              <div style="font-weight:700; color:var(--red); margin-bottom:10px;">❌ Bob 不知道的</div>
-              <div style="font-size:13px; color:var(--text2); line-height:1.8;">
+              <div style="font-weight:700; color:var(--red); margin-bottom:10px;" data-i18n="s5.bob.unknown">❌ Bob 不知道的</div>
+              <div style="font-size:13px; color:var(--text2); line-height:1.8;" data-i18n="s5.bob.unknown.list">
                 • Alice 叫什么名字<br>
                 • Alice 是哪国人<br>
                 • Alice 的证件号码<br>
@@ -492,9 +494,9 @@
 
     <!-- 右侧说明 -->
     <div class="panel explanation">
-      <div class="panel-header"><h2>📖 技术解析</h2></div>
+      <div class="panel-header"><h2 data-i18n="s5.exp.title">📖 技术解析</h2></div>
       <div class="panel-body" id="exp-5">
-        <div class="exp-title">第五步：Bob 的验证流程</div>
+        <div class="exp-title" data-i18n="s5.exp.heading">第五步：Bob 的验证流程</div>
         <div class="exp-technical">核心设计：Bob 的信任不来自 Alice，而来自链上数据
 
 ┌──────────────────────────────────┐
@@ -540,8 +542,8 @@ A: 不需要。Bob 只需要读链上合约。
     <div class="main-grid">
       <div class="panel">
         <div class="panel-header">
-          <h2>🚫 凭证撤销</h2>
-          <span class="badge">第 6 步 / 共 7 步</span>
+          <h2 data-i18n="s6.title">🚫 凭证撤销</h2>
+          <span class="badge" data-i18n="s6.badge">第 6 步 / 共 7 步</span>
         </div>
         <div class="panel-body">
           <p style="color:var(--text2); margin-bottom:16px;">
@@ -549,7 +551,7 @@ A: 不需要。Bob 只需要读链上合约。
           </p>
           <button class="btn btn-danger" id="btn-revoke" onclick="revokeCredential()">
             <span class="spinner"></span>
-            🚫 撤销 Alice 的凭证
+            <span data-i18n="s6.btn">🚫 撤销 Alice 的凭证</span>
           </button>
           <div id="revoke-result" style="margin-top:16px;"></div>
           <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:16px;">
@@ -558,7 +560,7 @@ A: 不需要。Bob 只需要读链上合约。
             </p>
             <button class="btn btn-secondary" id="btn-revoke-test" onclick="testRevokedProof()">
               <span class="spinner"></span>
-              🔄 测试已撤销凭证
+              <span data-i18n="s6.test.btn">🔄 测试已撤销凭证</span>
             </button>
             <div id="revoke-test-result" style="margin-top:12px;"></div>
           </div>
@@ -603,14 +605,14 @@ A: 不需要。Bob 只需要读链上合约。
     <div class="main-grid">
       <div class="panel">
         <div class="panel-header">
-          <h2>🔗 不可关联性演示</h2>
-          <span class="badge">第 7 步 / 共 7 步</span>
+          <h2 data-i18n="s7.title">🔗 不可关联性演示</h2>
+          <span class="badge" data-i18n="s7.badge">第 7 步 / 共 7 步</span>
         </div>
         <div class="panel-body">
           <p style="color:var(--text2); margin-bottom:16px;">
             首先创建第二个用户来演示不可关联性（因为 Alice 已被撤销）。
           </p>
-          <button class="btn btn-secondary" id="btn-user2" onclick="createUser2()" style="margin-bottom:16px;">
+          <button class="btn btn-secondary" id="btn-user2" onclick="createUser2()" style="margin-bottom:16px;" data-i18n="s7.user2.btn">
             👤 创建用户 Charlie
           </button>
           <p style="color:var(--text2); margin-bottom:16px;">
@@ -619,7 +621,7 @@ A: 不需要。Bob 只需要读链上合约。
           </p>
           <button class="btn btn-primary" id="btn-unlink" onclick="demoUnlinkability()">
             <span class="spinner"></span>
-            🔗 生成 3 个不可关联的证明
+            <span data-i18n="s7.btn">🔗 生成 3 个不可关联的证明</span>
           </button>
           <div id="unlink-result" style="margin-top:16px;"></div>
         </div>
@@ -660,7 +662,7 @@ zkKYC：
 </div>
 
 <!-- Reset button -->
-<button class="btn btn-secondary reset-btn" onclick="resetAll()">🔄 重置演示</button>
+<button class="btn btn-secondary reset-btn" onclick="resetAll()" data-i18n="reset.btn">🔄 重置演示</button>
 
 <script src="app.js"></script>
 </body>

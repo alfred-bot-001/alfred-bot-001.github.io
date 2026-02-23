@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-page="user-demo">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>zkKYC — 用户视角演示</title>
+  <script src="i18n.js"></script>
   <style>
     :root {
       --bg: #0a0a0f;
@@ -302,17 +303,20 @@
 <body>
 
 <div class="topbar">
-  <h1>🔐 zkKYC 用户视角</h1>
-  <a href="/" style="font-size:12px; color:var(--text2); text-decoration:none; padding:5px 12px; border:1px solid var(--border); border-radius:8px;">📖 技术视角 →</a>
+  <h1 data-i18n="ud.title">🔐 zkKYC 用户视角</h1>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <button class="lang-toggle" onclick="toggleLang()" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:4px 12px; border-radius:14px; font-size:12px; font-weight:700; cursor:pointer;">EN</button>
+    <a href="/" style="font-size:12px; color:var(--text2); text-decoration:none; padding:5px 12px; border:1px solid var(--border); border-radius:8px;" data-i18n="ud.switch">📖 技术视角 →</a>
+  </div>
 </div>
 
 <!-- Mode tabs -->
 <div class="mode-tabs">
-  <div class="mode-tab active" onclick="switchMode('wallet')">📱 方案A：钱包对钱包</div>
-  <div class="mode-tab" onclick="switchMode('platform')">🌐 方案B：P2P 平台</div>
-  <div class="mode-tab" onclick="switchMode('manual')">💻 方案C：手动验证</div>
+  <div class="mode-tab active" onclick="switchMode('wallet')" data-i18n="ud.mode.wallet">📱 方案A：钱包对钱包</div>
+  <div class="mode-tab" onclick="switchMode('platform')" data-i18n="ud.mode.platform">🌐 方案B：P2P 平台</div>
+  <div class="mode-tab" onclick="switchMode('manual')" data-i18n="ud.mode.manual">💻 方案C：手动验证</div>
 </div>
-<div class="mode-desc" id="mode-desc">Alice 和 Bob 通过钱包直接 P2P 交易，SDK 自动完成验证</div>
+<div class="mode-desc" id="mode-desc" data-i18n="ud.mode.wallet.desc">Alice 和 Bob 通过钱包直接 P2P 交易，SDK 自动完成验证</div>
 
 <!-- ═══════════════════════════════════════ -->
 <!-- MODE A: Wallet to Wallet -->
@@ -322,25 +326,25 @@
     <div class="phone">
       <div class="phone-header">
         <div class="phone-avatar alice">👩</div>
-        <div><div class="phone-name">Alice 的钱包</div><div class="phone-sub" id="a-status-w">等待开始...</div></div>
+        <div><div class="phone-name" data-i18n="ud.wallet.alice">Alice 的钱包</div><div class="phone-sub" id="a-status-w" data-i18n="ud.wallet.waiting">等待开始...</div></div>
       </div>
       <div class="phone-body" id="a-body-w">
         <div class="wallet-card">
-          <div class="label">总资产</div><div class="balance">32.5 ETH</div>
+          <div class="label" data-i18n="ud.wallet.assets">总资产</div><div class="balance">32.5 ETH</div>
           <div class="addr">0xAlice...8a2f</div>
         </div>
         <div class="chat-area" id="a-chat-w"></div>
-        <button class="action-btn primary" id="a-btn-w" onclick="walletNext()">🚀 开始演示</button>
+        <button class="action-btn primary" id="a-btn-w" onclick="walletNext()" data-i18n="ud.wallet.start">🚀 开始演示</button>
       </div>
     </div>
     <div class="phone">
       <div class="phone-header">
         <div class="phone-avatar bob">👨</div>
-        <div><div class="phone-name">Bob 的钱包</div><div class="phone-sub" id="b-status-w">等待开始...</div></div>
+        <div><div class="phone-name" data-i18n="ud.wallet.bob">Bob 的钱包</div><div class="phone-sub" id="b-status-w" data-i18n="ud.wallet.waiting">等待开始...</div></div>
       </div>
       <div class="phone-body" id="b-body-w">
         <div class="wallet-card">
-          <div class="label">总资产</div><div class="balance">85.2 ETH</div>
+          <div class="label" data-i18n="ud.wallet.assets">总资产</div><div class="balance">85.2 ETH</div>
           <div class="addr">0xBob...7f3e</div>
         </div>
         <div class="chat-area" id="b-chat-w"></div>
@@ -366,7 +370,7 @@
       </div>
       <div class="platform-body" id="platform-body">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <div style="font-size:18px; font-weight:700;">P2P 交易大厅</div>
+          <div style="font-size:18px; font-weight:700;" data-i18n="ud.platform.title">P2P 交易大厅</div>
           <div style="font-size:12px; color:var(--text2);">已登录：Bob (0xBob...7f3e)</div>
         </div>
         <div class="trade-card" id="trade-card">
@@ -383,7 +387,7 @@
         </div>
         <div id="platform-extra"></div>
         <button class="action-btn primary" id="platform-btn" onclick="platformNext()" style="max-width:300px; margin:16px auto;">
-          🔍 请求卖方 KYC 证明
+          <span data-i18n="ud.platform.btn">🔍 请求卖方 KYC 证明</span>
         </button>
       </div>
     </div>
@@ -406,13 +410,13 @@
         <div style="font-size:11px; color:var(--text2);">手动验证模式</div>
       </div>
       <div class="platform-body" id="manual-body">
-        <div style="font-size:15px; font-weight:700; margin-bottom:6px;">💻 手动验证 zkKYC 证明</div>
-        <div style="font-size:12px; color:var(--text2); margin-bottom:16px;">
+        <div style="font-size:15px; font-weight:700; margin-bottom:6px;" data-i18n="ud.manual.title">💻 手动验证 zkKYC 证明</div>
+        <div style="font-size:12px; color:var(--text2); margin-bottom:16px;" data-i18n="ud.manual.desc">
           类似 Binance Proof of Reserves — Bob 自行下载工具，本地验证 Alice 的证明
         </div>
         <div id="manual-content"></div>
         <button class="action-btn primary" id="manual-btn" onclick="manualNext()" style="max-width:300px; margin:16px auto;">
-          ▶️ 开始手动验证流程
+          <span data-i18n="ud.manual.btn">▶️ 开始手动验证流程</span>
         </button>
       </div>
     </div>
@@ -451,9 +455,9 @@ function switchMode(mode) {
   document.querySelector(`.mode-tab[onclick="switchMode('${mode}')"]`).classList.add("active");
   document.getElementById(`mode-${mode}`).classList.add("active");
   const descs = {
-    wallet: "Alice 和 Bob 通过钱包直接 P2P 交易，SDK 自动完成验证",
-    platform: "Bob 在 P2P 交易平台上下单，平台自动请求并验证 Alice 的 KYC 证明",
-    manual: "类似 Binance PoS — Bob 下载开源工具，在本地终端手动验证 Alice 的证明",
+    wallet: typeof t === 'function' ? t('ud.mode.wallet.desc') : "Alice 和 Bob 通过钱包直接 P2P 交易，SDK 自动完成验证",
+    platform: typeof t === 'function' ? t('ud.mode.platform.desc') : "Bob 在 P2P 交易平台上下单，平台自动请求并验证 Alice 的 KYC 证明",
+    manual: typeof t === 'function' ? t('ud.mode.manual.desc') : "类似 Binance PoS — Bob 下载开源工具，在本地终端手动验证 Alice 的证明",
   };
   document.getElementById("mode-desc").textContent = descs[mode];
 }
