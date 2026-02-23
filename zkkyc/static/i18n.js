@@ -44,6 +44,7 @@ const I18N = {
 
 公钥被公开发布，任何人都可以用它来验证
 该发行方签发的凭证。`,
+    's1.exp.summary': '一句话总结：Binance 生成了一把密码学钥匙，用它推导出一个全球唯一的身份ID，写了一份标准化的身份文档，然后把公钥发布到区块链上 —— 从此任何人都可以独立验证 Binance 签发的凭证，不需要联系 Binance。',
     's1.exp.next': '👉 点击按钮开始演示',
 
     // Step 2
@@ -432,6 +433,7 @@ zkKYC：
 
 The public key is published openly — anyone can use it
 to verify credentials issued by this issuer.`,
+    's1.exp.summary': 'In a nutshell: Binance generates a cryptographic key pair, derives a globally unique identity ID from it, creates a standardized identity document, and publishes the public key on the blockchain — from then on, anyone can independently verify credentials issued by Binance, without ever contacting Binance.',
     's1.exp.next': '👉 Click the button to start the demo',
 
     // Step 2

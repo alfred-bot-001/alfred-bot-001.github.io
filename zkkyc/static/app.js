@@ -155,6 +155,10 @@ function updateExplanation(stepN, data) {
   }
   if (exp.technical) html += `<div class="exp-technical">${exp.technical}</div>`;
   if (exp.privacy_note) html += `<div class="privacy-box">${exp.privacy_note}</div>`;
+  if (stepN === 1) {
+    const summary = typeof t === 'function' ? t('s1.exp.summary') : '一句话总结：Binance 生成了一把密码学钥匙，用它推导出一个全球唯一的身份ID，写了一份标准化的身份文档，然后把公钥发布到区块链上 —— 从此任何人都可以独立验证 Binance 签发的凭证，不需要联系 Binance。';
+    html += `<div style="margin-top:16px; padding:14px 16px; background:rgba(88,166,255,0.08); border:1px solid rgba(88,166,255,0.2); border-radius:10px; font-size:13px; color:var(--text); line-height:1.8;"><strong>💡</strong> ${summary}</div>`;
+  }
   if (exp.next) html += `<div class="exp-next">👉 ${exp.next}</div>`;
   el.innerHTML = html;
   el.classList.add("fade-in");
@@ -172,7 +176,6 @@ async function setupIssuer() {
     el.style.display = "block";
     el.innerHTML = prettyJSON(data.result);
     updateExplanation(1, data);
-    setTimeout(() => showStep(2), 800);
   } catch (e) { alert("错误: " + e.message); }
   setLoading("btn-setup", false);
 }
@@ -198,7 +201,6 @@ async function submitKYC() {
     updateExplanation(2, data);
     document.getElementById("alice-did").textContent = `DID: ${appState.holderDid}`;
     generateNonce();
-    setTimeout(() => showStep(3), 800);
   } catch (e) { alert("错误: " + e.message); }
   setLoading("btn-kyc", false);
 }
@@ -234,7 +236,6 @@ async function generateProof() {
     el.style.display = "block";
     el.innerHTML = prettyJSON(data.result);
     updateExplanation(4, data);
-    setTimeout(() => showStep(5), 800);
   } catch (e) { alert("错误: " + e.message); }
   setLoading("btn-proof", false);
 }
