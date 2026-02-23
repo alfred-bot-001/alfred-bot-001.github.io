@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page="competitors">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zkKYC — 竞对分析</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
+  <style>
+    .comp-container { max-width: 1200px; margin: 0 auto; padding: 30px 40px 80px; }
+    .comp-section { margin-bottom: 36px; }
+    .comp-section h2 { font-size: 20px; margin-bottom: 16px; color: var(--accent); }
+    .comp-section h3 { font-size: 16px; margin: 20px 0 12px; color: var(--cyan); }
+
+    .comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 900px) { .comp-grid { grid-template-columns: 1fr; } }
+
+    .comp-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; transition: border-color 0.2s; position: relative;
+    }
+    .comp-card:hover { border-color: var(--accent); }
+    .comp-card .comp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .comp-card .comp-name { font-size: 16px; font-weight: 700; }
+    .comp-card .comp-tag {
+      font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600;
+    }
+    .tag-live { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .tag-growing { background: rgba(210,153,34,0.15); color: #d29922; }
+    .tag-gov { background: rgba(136,108,228,0.15); color: #886ce4; }
+    .tag-enterprise { background: rgba(88,166,255,0.15); color: #58a6ff; }
+    .comp-card .comp-desc { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 12px; }
+    .comp-card .comp-tech { font-size: 12px; color: var(--text2); opacity: 0.7; }
+    .comp-card .comp-tech span { background: var(--bg3); padding: 2px 8px; border-radius: 8px; margin-right: 4px; }
+    .comp-card ul { list-style: none; font-size: 13px; color: var(--text2); line-height: 2; }
+    .comp-card ul li::before { content: "→ "; color: var(--accent); }
+
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .compare-table th {
+      text-align: center; padding: 10px 8px; background: var(--bg3);
+      border: 1px solid var(--border); color: var(--accent); font-weight: 600;
+    }
+    .compare-table td {
+      padding: 10px 8px; border: 1px solid var(--border); color: var(--text2);
+      text-align: center; line-height: 1.5;
+    }
+    .compare-table td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+    .compare-table tr:hover td { background: rgba(88,166,255,0.04); }
+
+    .our-row td { background: rgba(88,166,255,0.08) !important; }
+
+    .landscape-box {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;
+    }
+    @media (max-width: 800px) { .landscape-box { grid-template-columns: 1fr; } }
+    .landscape-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+    }
+    .landscape-card .lc-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .landscape-card ul { list-style: none; font-size: 12px; color: var(--text2); line-height: 2; }
+    .landscape-card ul li::before { content: "• "; color: var(--accent); }
+
+    .insight-box {
+      background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2);
+      border-radius: 12px; padding: 20px; margin-top: 16px;
+    }
+    .insight-box .insight-title { font-weight: 700; font-size: 15px; color: var(--accent); margin-bottom: 10px; }
+    .insight-box p { font-size: 14px; color: var(--text2); line-height: 1.8; }
+
+    .toc { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .toc a {
+      padding: 6px 14px; border-radius: 16px; font-size: 12px; text-decoration: none;
+      background: var(--bg2); border: 1px solid var(--border); color: var(--text2); transition: all 0.2s;
+    }
+    .toc a:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1 data-i18n="comp.title">🔍 竞对分析</h1>
+    <div class="subtitle" data-i18n="comp.subtitle">行业竞品 · 技术对比 · 差异化定位</div>
+  </div>
+  <div class="page-nav">
+    <a href="/" data-i18n="nav.tech">🔐 技术视角</a>
+    <a href="/user-demo.html" data-i18n="nav.user">👤 用户视角</a>
+    <a href="/business.html" data-i18n="nav.biz">💼 商业视角</a>
+    <a href="/competitors.html" class="active" data-i18n="nav.comp">🔍 竞对分析</a>
+    <button class="lang-toggle" onclick="toggleLang()">EN</button>
+  </div>
+</div>
+
+<div class="comp-container">
+
+  <div class="toc">
+    <a href="#direct" data-i18n="comp.toc.direct">🎯 直接竞品</a>
+    <a href="#adjacent" data-i18n="comp.toc.adjacent">🔗 相近方案</a>
+    <a href="#compare" data-i18n="comp.toc.compare">📊 对比矩阵</a>
+    <a href="#landscape" data-i18n="comp.toc.landscape">🗺️ 行业图谱</a>
+    <a href="#position" data-i18n="comp.toc.position">💡 差异化定位</a>
+  </div>
+
+  <!-- ═══ Direct Competitors ═══ -->
+  <div class="comp-section" id="direct">
+    <h2 data-i18n="comp.direct.title">🎯 直接竞品 — 同赛道 zkKYC 方案</h2>
+    <div class="comp-grid">
+
+      <div class="comp-card">
+        <div class="comp-header">
+          <div class="comp-name">zkMe</div>
+          <div class="comp-tag tag-live" data-i18n="comp.tag.live">已上线</div>
+        </div>
+        <div class="comp-desc" data-i18n="comp.zkme.desc">专做 zkKYC 的项目，Polygon ID 上第一个去中心化凭证发行方。用户做一次 KYC → 拿到 ZK 凭证 → 在多个 DeFi 平台复用。与我们的设计最为接近。</div>
+        <ul>
+          <li data-i18n="comp.zkme.b1">✅ 真实 KYC 对接（护照/身份证 OCR + 活体检测）</li>
+          <li data-i18n="comp.zkme.b2">✅ 已集成 Polygon ID 基础设施</li>
+          <li data-i18n="comp.zkme.b3">✅ 多链支持（Ethereum, Polygon, BNB Chain）</li>
+          <li data-i18n="comp.zkme.b4">⚠️ 中心化 KYC 入口，仅验证结果去中心化</li>
+        </ul>
+        <div class="comp-tech"><span>Polygon ID</span><span>BBS+</span><span>W3C VC</span></div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-header">
+          <div class="comp-name">Polygon ID (Privado ID)</div>
+          <div class="comp-tag tag-live" data-i18n="comp.tag.live">已上线</div>
+        </div>
+        <div class="comp-desc" data-i18n="comp.polygonid.desc">目前最成熟的 ZK 身份基础设施。提供完整的发行方→持有方→验证方三角架构，支持 W3C 可验证凭证 + ZK 选择性披露。</div>
+        <ul>
+          <li data-i18n="comp.polygonid.b1">✅ 完整 SDK（移动端 + Web + 合约）</li>
+          <li data-i18n="comp.polygonid.b2">✅ zkProof Request Language 链上验证</li>
+          <li data-i18n="comp.polygonid.b3">✅ 动态凭证（可更新状态）</li>
+          <li data-i18n="comp.polygonid.b4">⚠️ 主要绑定 Polygon 生态</li>
+        </ul>
+        <div class="comp-tech"><span>Iden3</span><span>Circom</span><span>Baby JubJub</span><span>W3C VC</span></div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-header">
+          <div class="comp-name">zkPass</div>
+          <div class="comp-tag tag-growing" data-i18n="comp.tag.growing">快速增长</div>
+        </div>
+        <div class="comp-desc" data-i18n="comp.zkpass.desc">无需发行方配合，直接从 Web2 数据源（银行、政府网站）用 zkTLS 技术提取数据并生成 ZK 证明。已发币 $ZKP。</div>
+        <ul>
+          <li data-i18n="comp.zkpass.b1">✅ 不依赖发行方，直接从数据源取证</li>
+          <li data-i18n="comp.zkpass.b2">✅ zkTLS 技术 — TLS 会话中生成证明</li>
+          <li data-i18n="comp.zkpass.b3">✅ 覆盖面广：银行、社交、政府数据</li>
+          <li data-i18n="comp.zkpass.b4">⚠️ 依赖 Web2 网站结构，易受改版影响</li>
+        </ul>
+        <div class="comp-tech"><span>zkTLS</span><span>MPC</span><span>3P-TLS</span></div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-header">
+          <div class="comp-name">Worldcoin / World ID</div>
+          <div class="comp-tag tag-growing" data-i18n="comp.tag.growing">快速增长</div>
+        </div>
+        <div class="comp-desc" data-i18n="comp.worldcoin.desc">通过虹膜扫描（Orb 设备）生成唯一身份证明。不证明"你是谁"，只证明"你是唯一的真人"。争议与热度并存。</div>
+        <ul>
+          <li data-i18n="comp.worldcoin.b1">✅ 大规模部署（全球多国设 Orb 点）</li>
+          <li data-i18n="comp.worldcoin.b2">✅ Proof of Personhood 独特定位</li>
+          <li data-i18n="comp.worldcoin.b3">⚠️ 需要专用硬件（Orb）</li>
+          <li data-i18n="comp.worldcoin.b4">⚠️ 生物特征采集引发严重隐私争议</li>
+        </ul>
+        <div class="comp-tech"><span>Semaphore</span><span>Iris Biometrics</span><span>ZK-SNARK</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ Adjacent ═══ -->
+  <div class="comp-section" id="adjacent">
+    <h2 data-i18n="comp.adjacent.title">🔗 相近方案 — 不同切入点，相似架构</h2>
+    <div class="comp-grid">
+
+      <div class="comp-card">
+        <div class="comp-header">
+          <div class="comp-name" data-i18n="comp.eidas.name">🇪🇺 欧盟 eIDAS 2.0 / EUDI Wallet</div>
+          <div class="comp-tag tag-gov" data-i18n="comp.tag.gov">政府推动</div>
+        </div>
+        <div class="comp-desc" data-i18n="comp.eidas.desc">欧盟正在推的数字身份钱包，2026-2027 强制落地。政府签发凭证→公民存手机钱包→选择性披露。政策层面最大的行业催化剂。</div>
+        <ul>
+          <li data-i18n="comp.eidas.b1">✅ 法律强制：所有欧盟成员国必须支持</li>
+          <li data-i18n="comp.eidas.b2">✅ 覆盖 4.5 亿人口</li>
+          <li data-i18n="comp.eidas.b3">⚠️ 不一定用 ZK（可能是传统选择性披露）</li>
+          <li data-i18n="comp.eidas.b4">⚠️ 进度慢，官僚体系效率低</li>
+        </ul>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-header">
+          <div class="comp-name">Microsoft Entra Verified ID</div>
+          <div class="comp-tag tag-enterprise" data-i18n="comp.tag.enterprise">企业级</div>
+        </div>
+        <div class="comp-desc" data-i18n="comp.msft.desc">微软的企业级去中心化身份方案。公司签发员工/供应商凭证，跨组织验证。主打 B2B 场景。</div>
+        <ul>
+          <li data-i18n="comp.msft.b1">✅ 企业客户基础庞大（Azure AD 集成）</li>
+          <li data-i18n="comp.msft.b2">✅ W3C DID / VC 标准</li>
+          <li data-i18n="comp.msft.b3">⚠️ 不针对 crypto/DeFi 场景</li>
+          <li data-i18n="comp.msft.b4">⚠️ 无 ZK 证明，选择性披露有限</li>
+        </ul>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-header">
+          <div class="comp-name">Dock.io / Truvera</div>
+          <div class="comp-tag tag-live" data-i18n="comp.tag.live">已上线</div>
+        </div>
+        <div class="comp-desc" data-i18n="comp.dock.desc">专做可复用 KYC 凭证的平台。IDV 机构签发凭证→用户在多个金融服务间复用。主打"做一次 KYC，到处用"。</div>
+        <ul>
+          <li data-i18n="comp.dock.b1">✅ 已有真实 IDV 合作伙伴</li>
+          <li data-i18n="comp.dock.b2">✅ 可复用凭证降低重复 KYC 成本</li>
+          <li data-i18n="comp.dock.b3">⚠️ ZK 能力较弱</li>
+        </ul>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-header">
+          <div class="comp-name">Sismo Protocol</div>
+          <div class="comp-tag tag-live" data-i18n="comp.tag.live">已上线</div>
+        </div>
+        <div class="comp-desc" data-i18n="comp.sismo.desc">用 ZK 证明聚合多个身份源（GitHub、Twitter、链上活动），生成隐私保护的身份徽章。偏社交身份验证。</div>
+        <ul>
+          <li data-i18n="comp.sismo.b1">✅ 多源身份聚合</li>
+          <li data-i18n="comp.sismo.b2">✅ ZK Attestation 机制</li>
+          <li data-i18n="comp.sismo.b3">⚠️ 不针对合规 KYC 场景</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ Comparison Matrix ═══ -->
+  <div class="comp-section" id="compare">
+    <h2 data-i18n="comp.compare.title">📊 技术对比矩阵</h2>
+    <div style="overflow-x:auto;">
+    <table class="compare-table">
+      <tr>
+        <th data-i18n="comp.th.project">项目</th>
+        <th data-i18n="comp.th.zk">ZK 技术</th>
+        <th data-i18n="comp.th.did">DID 标准</th>
+        <th data-i18n="comp.th.vc">W3C VC</th>
+        <th data-i18n="comp.th.selective">选择性披露</th>
+        <th data-i18n="comp.th.revocation">凭证撤销</th>
+        <th data-i18n="comp.th.unlinkable">不可关联</th>
+        <th data-i18n="comp.th.onchain">链上验证</th>
+        <th data-i18n="comp.th.issuer">需发行方</th>
+        <th data-i18n="comp.th.status">状态</th>
+      </tr>
+      <tr class="our-row">
+        <td><strong>zkKYC (Ours)</strong></td>
+        <td>BBS+ / ECDSA</td>
+        <td>✅</td><td>✅</td><td>✅</td><td>✅ Merkle</td><td>✅ Nullifier</td><td>✅</td><td>✅</td>
+        <td data-i18n="comp.status.demo">Demo</td>
+      </tr>
+      <tr>
+        <td>zkMe</td>
+        <td>BBS+ / Iden3</td>
+        <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+        <td data-i18n="comp.status.prod">生产</td>
+      </tr>
+      <tr>
+        <td>Polygon ID</td>
+        <td>Circom / Groth16</td>
+        <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+        <td data-i18n="comp.status.prod">生产</td>
+      </tr>
+      <tr>
+        <td>zkPass</td>
+        <td>zkTLS / MPC</td>
+        <td>❌</td><td>❌</td><td>✅</td><td>N/A</td><td>部分</td><td>✅</td><td>❌</td>
+        <td data-i18n="comp.status.prod">生产</td>
+      </tr>
+      <tr>
+        <td>Worldcoin</td>
+        <td>Semaphore</td>
+        <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>✅ (Orb)</td>
+        <td data-i18n="comp.status.prod">生产</td>
+      </tr>
+      <tr>
+        <td>eIDAS 2.0</td>
+        <td data-i18n="comp.eidas.zk">待定</td>
+        <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td data-i18n="comp.eidas.tbd">待定</td><td>❌</td><td>✅</td>
+        <td data-i18n="comp.status.dev">开发中</td>
+      </tr>
+      <tr>
+        <td>MS Entra</td>
+        <td>❌</td>
+        <td>✅</td><td>✅</td><td data-i18n="comp.ms.limited">有限</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td>
+        <td data-i18n="comp.status.prod">生产</td>
+      </tr>
+      <tr>
+        <td>Dock.io</td>
+        <td data-i18n="comp.dock.zk">基础</td>
+        <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td>
+        <td data-i18n="comp.status.prod">生产</td>
+      </tr>
+    </table>
+    </div>
+  </div>
+
+  <!-- ═══ Landscape ═══ -->
+  <div class="comp-section" id="landscape">
+    <h2 data-i18n="comp.landscape.title">🗺️ 行业图谱</h2>
+    <div class="landscape-box">
+      <div class="landscape-card">
+        <div class="lc-title" data-i18n="comp.ls.infra">🏗️ 基础设施层</div>
+        <ul>
+          <li>Polygon ID / Privado ID — ZK 身份协议</li>
+          <li>Iden3 — 底层密码学库</li>
+          <li>Semaphore — 匿名信号协议</li>
+          <li>Circom / Groth16 — ZK 电路编译</li>
+        </ul>
+      </div>
+      <div class="landscape-card">
+        <div class="lc-title" data-i18n="comp.ls.app">📱 应用层</div>
+        <ul>
+          <li>zkMe — zkKYC 凭证发行</li>
+          <li>zkPass — Web2 数据 ZK 证明</li>
+          <li>Worldcoin — 人类身份证明</li>
+          <li>Sismo — 社交身份聚合</li>
+        </ul>
+      </div>
+      <div class="landscape-card">
+        <div class="lc-title" data-i18n="comp.ls.demand">🏛️ 需求方</div>
+        <ul>
+          <li>DeFi 协议 — Aave Arc, Maple Finance</li>
+          <li>P2P 平台 — Binance P2P, Paxful</li>
+          <li>DEX — dYdX, Uniswap</li>
+          <li data-i18n="comp.ls.demand.reg">监管机构 — 欧盟 eIDAS, FATF Travel Rule</li>
+        </ul>
+      </div>
+      <div class="landscape-card">
+        <div class="lc-title" data-i18n="comp.ls.trad">🏢 传统身份</div>
+        <ul>
+          <li>Microsoft Entra Verified ID</li>
+          <li>Dock.io / Truvera</li>
+          <li data-i18n="comp.ls.trad.eu">欧盟 EUDI Wallet</li>
+          <li data-i18n="comp.ls.trad.idv">传统 IDV: Jumio, Onfido, Sumsub</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Our Position ═══ -->
+  <div class="comp-section" id="position">
+    <h2 data-i18n="comp.position.title">💡 差异化定位</h2>
+
+    <div class="insight-box">
+      <div class="insight-title" data-i18n="comp.pos.strength.title">✅ 我们的优势</div>
+      <p data-i18n="comp.pos.strength.desc">1. 完整的 7 步端到端演示 — 市面上最直观的 zkKYC 教育工具
+2. 同时覆盖技术视角 + 用户视角 + 商业视角，适合不同受众
+3. BBS+ 签名 + Merkle 撤销 + Nullifier 不可关联，三大隐私特性齐全
+4. 中英双语，面向国际受众
+5. 开源 + 一键部署，任何人可以体验</p>
+    </div>
+
+    <div class="insight-box" style="margin-top:16px;">
+      <div class="insight-title" data-i18n="comp.pos.gap.title">⚠️ 与生产级的差距</div>
+      <p data-i18n="comp.pos.gap.desc">1. 密码学为模拟实现，非生产级安全
+2. 无真实 KYC 数据源对接（OCR、活体检测）
+3. 未接入真实区块链（链上注册表为内存模拟）
+4. 无移动端钱包 SDK
+5. 无多发行方 / 跨链互操作</p>
+    </div>
+
+    <div class="insight-box" style="margin-top:16px;">
+      <div class="insight-title" data-i18n="comp.pos.path.title">🚀 从 Demo 到产品的最短路径</div>
+      <p data-i18n="comp.pos.path.desc">1. 接入 Polygon ID 基础设施（替换自研密码学）
+2. 对接 zkMe 或自建 KYC 入口
+3. 部署链上 Registry 合约（Polygon / Ethereum）
+4. 开发移动端钱包（存储凭证 + 生成证明）
+5. 找一个 DeFi 协议做首个验证方集成</p>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
