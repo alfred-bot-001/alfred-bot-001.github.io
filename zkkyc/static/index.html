@@ -9,27 +9,26 @@
 </head>
 <body>
 
-<!-- Page Navigation -->
-<div class="page-nav">
-  <a href="/" class="active" data-i18n="nav.tech">🔐 技术视角</a>
-  <a href="/user-demo.html" data-i18n="nav.user">👤 用户视角</a>
-  <a href="/business.html" data-i18n="nav.biz">💼 商业视角</a>
-  <div class="nav-spacer"></div>
-  <button class="lang-toggle" onclick="toggleLang()">EN</button>
-</div>
-
 <!-- Header -->
 <div class="header">
   <div>
     <h1 data-i18n="header.title">🔐 zkKYC 演示</h1>
     <div class="subtitle" data-i18n="header.subtitle">零知识 KYC 凭证系统 — 链上 P2P 交易隐私合规方案</div>
   </div>
-  <div class="status-bar">
-    <div class="stat"><span class="dot off" id="dot-issuer"></span> <span data-i18n="header.issuer">发行方</span></div>
-    <div class="stat"><span class="dot off" id="dot-user"></span> <span data-i18n="header.user">用户</span></div>
-    <div class="stat"><span class="dot off" id="dot-proof"></span> <span data-i18n="header.proof">证明</span></div>
-    <div class="stat" id="stat-creds">凭证数: 0</div>
-    <div class="stat" id="stat-verifs">验证数: 0</div>
+  <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+    <div class="page-nav">
+      <a href="/" class="active" data-i18n="nav.tech">🔐 技术视角</a>
+      <a href="/user-demo.html" data-i18n="nav.user">👤 用户视角</a>
+      <a href="/business.html" data-i18n="nav.biz">💼 商业视角</a>
+      <button class="lang-toggle" onclick="toggleLang()">EN</button>
+    </div>
+    <div class="status-bar">
+      <div class="stat"><span class="dot off" id="dot-issuer"></span> <span data-i18n="header.issuer">发行方</span></div>
+      <div class="stat"><span class="dot off" id="dot-user"></span> <span data-i18n="header.user">用户</span></div>
+      <div class="stat"><span class="dot off" id="dot-proof"></span> <span data-i18n="header.proof">证明</span></div>
+      <div class="stat" id="stat-creds">凭证数: 0</div>
+      <div class="stat" id="stat-verifs">验证数: 0</div>
+    </div>
   </div>
 </div>
 
