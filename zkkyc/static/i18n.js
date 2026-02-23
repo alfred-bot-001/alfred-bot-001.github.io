@@ -2,6 +2,11 @@
 
 const I18N = {
   zh: {
+    // Global nav
+    'nav.tech': '🔐 技术视角',
+    'nav.user': '👤 用户视角',
+    'nav.biz': '💼 商业视角',
+
     // index.html - Header
     'header.title': '🔐 zkKYC 演示',
     'header.subtitle': '零知识 KYC 凭证系统 — 链上 P2P 交易隐私合规方案',
@@ -385,6 +390,11 @@ zkKYC：
   },
 
   en: {
+    // Global nav
+    'nav.tech': '🔐 Technical',
+    'nav.user': '👤 User View',
+    'nav.biz': '💼 Business',
+
     // index.html - Header
     'header.title': '🔐 zkKYC Demo',
     'header.subtitle': 'Zero-Knowledge KYC Credential System — On-Chain P2P Privacy Compliance',

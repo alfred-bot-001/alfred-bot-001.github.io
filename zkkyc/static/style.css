@@ -490,6 +490,39 @@ body {
 .vt-step.done .vt-status { color: var(--green); }
 .vt-step.fail .vt-status { color: var(--red); }
 
+/* ── Page Nav Bar ── */
+.page-nav {
+  display: flex;
+  gap: 4px;
+  padding: 10px 20px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  align-items: center;
+}
+.page-nav a {
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text2);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.page-nav a:hover {
+  color: var(--text);
+  background: var(--bg2);
+}
+.page-nav a.active {
+  background: var(--accent);
+  color: #fff;
+}
+.page-nav .nav-spacer { flex: 1; }
+.page-nav .lang-toggle { margin-left: 8px; }
+
 /* ── Language Toggle ── */
 .lang-toggle {
   background: var(--bg3);

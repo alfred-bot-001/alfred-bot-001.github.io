@@ -71,15 +71,19 @@
 </head>
 <body>
 
+<!-- Page Navigation -->
+<div class="page-nav">
+  <a href="/" data-i18n="nav.tech">🔐 技术视角</a>
+  <a href="/user-demo.html" data-i18n="nav.user">👤 用户视角</a>
+  <a href="/business.html" class="active" data-i18n="nav.biz">💼 商业视角</a>
+  <div class="nav-spacer"></div>
+  <button class="lang-toggle" onclick="toggleLang()">EN</button>
+</div>
+
 <div class="header">
   <div>
     <h1 data-i18n="biz.title">💼 zkKYC 商业分析</h1>
     <div class="subtitle" data-i18n="biz.subtitle">业务模型 · 利益分析 · 风险评估</div>
-  </div>
-  <div class="status-bar">
-    <button class="lang-toggle" onclick="toggleLang()">EN</button>
-    <a href="/" style="font-size:12px; color:var(--accent); text-decoration:none; padding:6px 14px; border:1px solid var(--accent); border-radius:20px;" data-i18n="biz.back.tech">🔐 技术视角</a>
-    <a href="/user-demo.html" style="font-size:12px; color:var(--cyan); text-decoration:none; padding:6px 14px; border:1px solid var(--cyan); border-radius:20px;" data-i18n="biz.back.user">👤 用户视角</a>
   </div>
 </div>
 
