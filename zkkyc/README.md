@@ -57,6 +57,7 @@ uvicorn.run(app, host="0.0.0.0", port=8099)
 |-----|------|---------|
 | `http://localhost:8099/` | 技术视角 — 7步完整演示 zkKYC 流程 | Technical View — 7-step full zkKYC demo |
 | `http://localhost:8099/user-demo.html` | 用户视角 — 3种交互方案 | User View — 3 interaction scenarios |
+| `http://localhost:8099/business.html` | 商业视角 — 利益分析 & 风险评估 | Business View — Stakeholder benefits & risk assessment |
 
 页面右上角有 **中/EN 切换按钮**，支持中英文实时切换。
 
@@ -104,12 +105,15 @@ zkkyc/
 │   ├── did.py             #   DID 文档 / DID documents
 │   ├── credential.py      #   可验证凭证 / Verifiable credentials
 │   └── proof.py           #   可验证展示 / Verifiable presentations
+├── docs/
+│   └── BUSINESS.md        # 商业分析文档 / Business analysis doc
 └── static/                 # 前端 / Frontend
     ├── index.html         #   技术视角页面 / Technical view
     ├── user-demo.html     #   用户视角页面 / User view
     ├── app.js             #   主逻辑 / Main logic
     ├── style.css          #   样式 / Styles
-    └── i18n.js            #   中英文翻译 / i18n translations
+    ├── i18n.js            #   中英文翻译 / i18n translations
+    └── business.html      #   商业视角页面 / Business view
 ```
 
 ---
