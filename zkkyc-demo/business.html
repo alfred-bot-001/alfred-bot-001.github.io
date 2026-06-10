@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page="business">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zkKYC — 商业分析</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
+  <style>
+    .biz-container { max-width: 1100px; margin: 0 auto; padding: 30px 40px 80px; }
+    .biz-section { margin-bottom: 36px; }
+    .biz-section h2 { font-size: 20px; margin-bottom: 16px; color: var(--accent); }
+    .biz-section h3 { font-size: 16px; margin: 16px 0 10px; color: var(--cyan); }
+
+    .player-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 800px) { .player-grid { grid-template-columns: 1fr; } }
+
+    .player-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; transition: border-color 0.2s;
+    }
+    .player-card:hover { border-color: var(--accent); }
+    .player-card .player-name { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+    .player-card .player-icon { font-size: 28px; margin-bottom: 8px; }
+    .player-card ul { list-style: none; font-size: 13px; color: var(--text2); line-height: 2; }
+    .player-card ul li::before { content: "→ "; color: var(--accent); }
+
+    .revenue-box {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; font-family: 'SF Mono', monospace; font-size: 13px;
+      color: var(--text2); line-height: 2; white-space: pre-wrap;
+    }
+
+    .risk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .risk-table th {
+      text-align: left; padding: 10px 14px; background: var(--bg3);
+      border: 1px solid var(--border); color: var(--text2); font-weight: 600;
+    }
+    .risk-table td {
+      padding: 10px 14px; border: 1px solid var(--border); color: var(--text2); line-height: 1.6;
+    }
+    .risk-high { border-left: 3px solid #f85149 !important; }
+    .risk-mid { border-left: 3px solid #d29922 !important; }
+    .risk-low { border-left: 3px solid #3fb950 !important; }
+
+    .insight-box {
+      background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2);
+      border-radius: 12px; padding: 20px; margin-top: 16px;
+    }
+    .insight-box .insight-title { font-weight: 700; font-size: 15px; color: var(--accent); margin-bottom: 10px; }
+    .insight-box p { font-size: 14px; color: var(--text2); line-height: 1.8; }
+
+    .contradiction-box {
+      background: rgba(188,140,255,0.08); border: 1px solid rgba(188,140,255,0.2);
+      border-radius: 12px; padding: 20px; margin-top: 16px;
+    }
+    .contradiction-box .ct-title { font-weight: 700; font-size: 15px; color: var(--purple); margin-bottom: 10px; }
+    .contradiction-box blockquote {
+      font-size: 14px; color: var(--text); line-height: 1.8;
+      border-left: 3px solid var(--purple); padding-left: 14px; margin: 10px 0;
+    }
+
+    .toc { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .toc a {
+      padding: 6px 14px; border-radius: 16px; font-size: 12px; text-decoration: none;
+      background: var(--bg2); border: 1px solid var(--border); color: var(--text2);
+      transition: all 0.2s;
+    }
+    .toc a:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1 data-i18n="biz.title">💼 zkKYC 商业分析</h1>
+    <div class="subtitle" data-i18n="biz.subtitle">业务模型 · 利益分析 · 风险评估</div>
+  </div>
+  <div class="page-nav">
+    <a href="index.html" data-i18n="nav.tech">🔐 技术视角</a>
+    <a href="user-demo.html" data-i18n="nav.user">👤 用户视角</a>
+    <a href="business.html" class="active" data-i18n="nav.biz">💼 商业视角</a>
+    <a href="competitors.html" data-i18n="nav.comp">🔍 竞对分析</a>
+    <button class="lang-toggle" onclick="toggleLang()">EN</button>
+  </div>
+</div>
+
+<div class="biz-container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <a href="#players" data-i18n="biz.toc.players">🎯 玩家利益</a>
+    <a href="#revenue" data-i18n="biz.toc.revenue">💰 收入模型</a>
+    <a href="#risks" data-i18n="biz.toc.risks">⚠️ 风险分析</a>
+    <a href="#insights" data-i18n="biz.toc.insights">🧠 关键判断</a>
+  </div>
+
+  <!-- ═══ Players ═══ -->
+  <div class="biz-section" id="players">
+    <h2 data-i18n="biz.players.title">🎯 玩家利益图谱 / Stakeholder Benefits</h2>
+    <div class="player-grid">
+
+      <div class="player-card">
+        <div class="player-icon">🏛️</div>
+        <div class="player-name" data-i18n="biz.p1.name">发行方（Binance / Coinbase 等交易所）</div>
+        <ul>
+          <li data-i18n="biz.p1.b1">💰 新收入源：KYC 凭证签发收费（一次性 or 年费），撤销/更新也可收费</li>
+          <li data-i18n="biz.p1.b2">🏆 品牌溢价：成为链上信任锚点，"Binance Verified" 变成行业标准</li>
+          <li data-i18n="biz.p1.b3">📊 数据优势：不存用户数据，但掌握签发量、撤销率等宏观数据</li>
+          <li data-i18n="biz.p1.b4">🔗 生态锁定：用户依赖凭证，迁移成本高</li>
+        </ul>
+      </div>
+
+      <div class="player-card">
+        <div class="player-icon">👩</div>
+        <div class="player-name" data-i18n="biz.p2.name">用户 / 持有方（Alice）</div>
+        <ul>
+          <li data-i18n="biz.p2.b1">🔒 隐私保护：P2P 交易不用每次出示护照，个人信息零泄露</li>
+          <li data-i18n="biz.p2.b2">⚡ 便捷性：一次 KYC，到处使用，不用重复认证</li>
+          <li data-i18n="biz.p2.b3">💪 数据主权：凭证存本地，自己控制披露什么</li>
+          <li data-i18n="biz.p2.b4">🌍 跨平台通用：一个凭证在多个 DEX / P2P 平台使用</li>
+        </ul>
+      </div>
+
+      <div class="player-card">
+        <div class="player-icon">👨</div>
+        <div class="player-name" data-i18n="biz.p3.name">验证方 / 交易对手（Bob）</div>
+        <ul>
+          <li data-i18n="biz.p3.b1">✅ 合规保障：确认对方 KYC 合规，降低法律风险</li>
+          <li data-i18n="biz.p3.b2">🚫 无数据负担：不持有对方个人信息 = 不承担数据泄露责任</li>
+          <li data-i18n="biz.p3.b3">⏱️ 即时验证：无需联系第三方，链上读数据自主验证</li>
+        </ul>
+      </div>
+
+      <div class="player-card">
+        <div class="player-icon">🌐</div>
+        <div class="player-name" data-i18n="biz.p4.name">P2P 平台 / DEX</div>
+        <ul>
+          <li data-i18n="biz.p4.b1">📋 合规达标：满足监管要求但不碰用户隐私数据</li>
+          <li data-i18n="biz.p4.b2">💰 降低成本：不需自建 KYC 系统，接 SDK 即可</li>
+          <li data-i18n="biz.p4.b3">👥 吸引用户：隐私友好 = 竞争优势</li>
+        </ul>
+      </div>
+
+      <div class="player-card" style="grid-column: 1 / -1;">
+        <div class="player-icon">⚖️</div>
+        <div class="player-name" data-i18n="biz.p5.name">监管机构</div>
+        <ul>
+          <li data-i18n="biz.p5.b1">🔍 可控撤销：发现问题可要求发行方撤销凭证，立即全网失效</li>
+          <li data-i18n="biz.p5.b2">📊 宏观监控：链上凭证签发/撤销趋势可见</li>
+          <li data-i18n="biz.p5.b3">⚖️ 平衡点：隐私保护 vs 反洗钱的技术折中方案</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ Revenue ═══ -->
+  <div class="biz-section" id="revenue">
+    <h2 data-i18n="biz.revenue.title">💰 收入模型 / Revenue Model</h2>
+    <div class="revenue-box" data-i18n="biz.revenue.box">发行方 → 用户：凭证签发费（$5-50/次）
+发行方 → 平台：SDK 授权 / API 调用费
+平台 → 用户：交易手续费（含验证成本）
+发行方 → 发行方：跨机构凭证互认费</div>
+    <div class="insight-box" style="margin-top:16px;">
+      <div class="insight-title" data-i18n="biz.revenue.entry">🎯 最可能的切入点</div>
+      <p data-i18n="biz.revenue.entry.desc">Binance 作为首个发行方，在自己的 P2P 平台先跑通，然后开放给外部 DEX。已有 Proof of Reserves (PoR) 的零知识证明经验，技术和品牌基础最成熟。</p>
+    </div>
+  </div>
+
+  <!-- ═══ Risks ═══ -->
+  <div class="biz-section" id="risks">
+    <h2 data-i18n="biz.risks.title">⚠️ 风险分析 / Risk Assessment</h2>
+
+    <h3 data-i18n="biz.risks.high">🔴 高风险</h3>
+    <table class="risk-table">
+      <tr><th data-i18n="biz.risks.th.risk">风险</th><th data-i18n="biz.risks.th.desc">说明</th><th data-i18n="biz.risks.th.mitigation">应对</th></tr>
+      <tr class="risk-high">
+        <td data-i18n="biz.r1.name">监管不认可</td>
+        <td data-i18n="biz.r1.desc">各国监管可能不接受 ZK 证明作为合规手段，要求能看到真实身份</td>
+        <td data-i18n="biz.r1.fix">设计"执法后门"：法院命令下发行方可配合披露</td>
+      </tr>
+      <tr class="risk-high">
+        <td data-i18n="biz.r2.name">发行方中心化</td>
+        <td data-i18n="biz.r2.desc">签发权集中在少数交易所，可以拒签或任意撤销</td>
+        <td data-i18n="biz.r2.fix">多发行方竞争 + DAO 治理撤销流程</td>
+      </tr>
+      <tr class="risk-high">
+        <td data-i18n="biz.r3.name">密钥丢失</td>
+        <td data-i18n="biz.r3.desc">用户设备丢失/损坏 = 凭证丢失，需重新 KYC</td>
+        <td data-i18n="biz.r3.fix">加密备份到云端 / 社交恢复机制</td>
+      </tr>
+    </table>
+
+    <h3 data-i18n="biz.risks.mid">🟡 中风险</h3>
+    <table class="risk-table">
+      <tr><th data-i18n="biz.risks.th.risk">风险</th><th data-i18n="biz.risks.th.desc">说明</th><th data-i18n="biz.risks.th.mitigation">应对</th></tr>
+      <tr class="risk-mid">
+        <td data-i18n="biz.r4.name">凭证过期管理</td>
+        <td data-i18n="biz.r4.desc">大量用户同时过期造成续签拥堵</td>
+        <td data-i18n="biz.r4.fix">滚动过期 + 提前自动续签</td>
+      </tr>
+      <tr class="risk-mid">
+        <td data-i18n="biz.r5.name">Merkle 树膨胀</td>
+        <td data-i18n="biz.r5.desc">用户量大时链上更新成本高</td>
+        <td data-i18n="biz.r5.fix">批量更新 + L2 Rollup</td>
+      </tr>
+      <tr class="risk-mid">
+        <td data-i18n="biz.r6.name">串谋攻击</td>
+        <td data-i18n="biz.r6.desc">多个验证方联合分析时间戳等元数据尝试关联</td>
+        <td data-i18n="biz.r6.fix">随机延迟 + 混淆提交时间</td>
+      </tr>
+      <tr class="risk-mid">
+        <td data-i18n="biz.r7.name">凭证转让/买卖</td>
+        <td data-i18n="biz.r7.desc">用户把凭证卖给未认证的人</td>
+        <td data-i18n="biz.r7.fix">绑定设备密钥 + 生物特征绑定</td>
+      </tr>
+    </table>
+
+    <h3 data-i18n="biz.risks.low">🟢 低风险但需关注</h3>
+    <table class="risk-table">
+      <tr><th data-i18n="biz.risks.th.risk">风险</th><th data-i18n="biz.risks.th.desc">说明</th></tr>
+      <tr class="risk-low">
+        <td data-i18n="biz.r8.name">用户教育成本</td>
+        <td data-i18n="biz.r8.desc">ZK 概念对普通用户太抽象，需要极简 UX</td>
+      </tr>
+      <tr class="risk-low">
+        <td data-i18n="biz.r9.name">跨链互操作</td>
+        <td data-i18n="biz.r9.desc">不同链上的 Registry 合约需要同步</td>
+      </tr>
+      <tr class="risk-low">
+        <td data-i18n="biz.r10.name">量子计算威胁</td>
+        <td data-i18n="biz.r10.desc">ECDSA / BBS+ 长期来看需升级到抗量子算法</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ═══ Insights ═══ -->
+  <div class="biz-section" id="insights">
+    <h2 data-i18n="biz.insights.title">🧠 关键判断 / Key Insights</h2>
+
+    <div class="insight-box">
+      <div class="insight-title" data-i18n="biz.insights.prereq.title">模式跑通的前提条件 / Prerequisites for Success</div>
+      <p data-i18n="biz.insights.prereq.desc">1. 至少一个大交易所愿意当发行方 — Binance 最有动力（已有 PoR 经验）
+2. 监管态度 — 至少不反对，最好是鼓励（欧盟 eIDAS 2.0 方向是利好的）
+3. 用户量临界点 — 需要足够多的人持有凭证，验证方才愿意接入</p>
+    </div>
+
+    <div class="contradiction-box">
+      <div class="ct-title" data-i18n="biz.insights.contradiction.title">⚡ 最大的矛盾 / The Core Tension</div>
+      <blockquote data-i18n="biz.insights.contradiction.quote">监管想要"能查到人"，用户想要"查不到我"。zkKYC 的价值就是在这两者之间找平衡 —— 正常情况下保护隐私，执法需要时发行方可以配合。这本质上是个政治问题，不只是技术问题。</blockquote>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
